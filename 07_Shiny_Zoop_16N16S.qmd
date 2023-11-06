@@ -1,0 +1,486 @@
+---
+title: "Zooplankton Compostions"
+format: 
+  html:
+     page-layout: custom
+     self-contained: true
+server: shiny
+---
+::: panel-tabset
+
+# What you are going to find here
+
+
+# Clustering Methods
+
+:::: {.columns}
+
+::: {.column width="20%"}
+```{r}
+#| panel: sidebar
+vec_aggregation <- c(
+  'PG',
+  'SG1',
+  'Supergroup',
+  'Division',
+  'Class',
+  'Order',
+  'Family',
+  'Genus',
+  'Species',
+  'ASV')
+vars <- vec_aggregation
+ #selectInput('xcol', 'Aggregation Level',selected =1 vars)
+ #selectInput('ycol', 'Y Variable', vars, selected = vars[[2]])
+ #numericInput('clusters', 'Cluster count', 3, min = 1, max = 9)
+RemMoment <- c('Before','After')
+CHull = c("N","Y")
+selectInput('aggLevel', 'Aggregation Level',selected = 1,vars)
+numericInput('clustN', 'Cluster count', 10, min = 1, max = 40)
+numericInput('AtLeastN','ASVs in at least',1,min=1,max=5)
+selectInput('RemoveMoment','Remove b/a Agg.',selected = 1,RemMoment)
+selectInput('CHull','Convex Hull N/Y',selected = 1,CHull)
+```
+:::
+
+::: {.column width="80%"}
+
+::: {.panel-tabset}
+
+## Hclust
+
+```{r}
+#| panel: center
+plotOutput('LatDepth_Ward',height = '600px')
+```
+
+### Abiotics 
+
+::: {.panel-tabset}
+
+#### All
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Scatter')
+```
+
+#### Temp 
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_temp')
+```
+
+#### Salinity
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Salinity')
+```
+
+#### Pressure
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Pressure')
+```
+
+::: 
+
+### MDS 
+
+```{r}
+#| panel: center
+plotOutput('MDS_2D_Ward')
+```
+
+```{r}
+#| panel: center
+plotly::plotlyOutput('MDS_3D_Ward')
+```
+
+## Medoid
+
+```{r}
+#| panel: center
+plotOutput('LatDepth_Medoids',height = '600px')
+```
+
+### Abiotics 
+
+::: {.panel-tabset}
+
+#### All
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Scatter')
+```
+
+#### Temp 
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_temp')
+```
+
+#### Salinity
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Salinity')
+```
+
+#### Pressure
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Pressure')
+```
+
+::: 
+
+### MDS 
+
+```{r}
+#| panel: center
+plotOutput('MDS_2D_Medoid')
+```
+
+```{r}
+#| panel: center
+plotly::plotlyOutput('MDS_3D_Medoid',width = 'auto',height = 'auto')
+```
+
+:::
+:::
+::::
+
+```{r}
+#| context: server
+
+#### Loading Packages 
+library(shiny)
+library(tidyverse) ; library(dplyr) ; library(ggplot2)
+library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis)  ; library(plotly)
+
+
+#### Loading functions 
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ALR_CLR_distMatrices.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/aggregating_composition_new.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_temp.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds3d.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R')
+
+#### Loading data
+metadat = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/metadat_abiotic.csv') %>% as_tibble()
+
+dat_tax = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/treated_taxonomy_dat.csv') %>% 
+  as_tibble()
+
+dat_tax = dat_tax %>% mutate(
+  ASV=ifelse(
+    1:nrow(dat_tax)<10,
+    paste('ID000',1:nrow(dat_tax),sep=''),
+    ifelse(1:nrow(dat_tax)<100,
+           paste('ID00',1:nrow(dat_tax),sep=''),
+           ifelse(1:nrow(dat_tax)<1000,
+                  paste('ID0',1:nrow(dat_tax),sep=''),
+                  paste('ID',1:nrow(dat_tax),sep=''))))
+                          
+)
+
+#### Start of the app
+## Input list
+## input$aggLevel = 'PG'
+## input$clustN = 5
+## input$AtLeastN = 1
+
+#### creating the dataset
+
+selectedData <- reactive({
+   aggregating_compositions(
+        dFrame = dat_tax,
+        fillZeros = 'Add',
+        RemoveMoment = input$RemoveMoment,
+        aggregating_level = input$aggLevel,
+        PresentAtLeast = input$AtLeastN
+      ) 
+ })
+
+#### Creating the distance matrices
+#cat('Houston, we have a problem','\n')
+#list_ALR_CLR_dist <-  ALR_CLR_distMatrices(selectedData)
+
+#### Ward.D2 Clustering
+clusters_hclust <- reactive({
+  cutree(hclust(d =ALR_CLR_distMatrices(selectedData())$dist_Aitchison),input$clustN)})
+
+clusters_kmedoids<- reactive({
+  cluster::pam(ALR_CLR_distMatrices(selectedData())$CLR$x.clr,
+               k = input$clustN,cluster.only = T)
+})
+
+#### Storing it in the dataset
+
+df_plot <- reactive({
+  cat('Created df_plot','\n')
+  aggregating_compositions(
+    dFrame = dat_tax,
+    fillZeros = 'Nothing',
+    aggregating_level = input$aggLevel,
+    PresentAtLeast = input$AtLeastN,
+    metadata = metadat
+  ) %>% mutate(
+    OBS=1:n(),
+    Ward_Clust = as.factor(clusters_hclust()),
+    Medoid_Clust = as.factor(clusters_kmedoids())
+    #Medoid  = factor(ifelse(OBS%in%medoid_clust$id.med,1,0))
+  )
+})
+
+mds_obj <- reactive({
+  cat('Created mds_obj','\n')
+  cmdscale(
+    d = ALR_CLR_distMatrices(selectedData())$dist_Aitchison,
+    k = 3,eig = T,add=T
+    )
+})
+
+abiotics_ward <- reactive(
+  ggLatDepth_temp(
+    dataset = df_plot(),
+    clusterVar = 'Ward_Clust',
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+)
+
+abiotics_medoids <- reactive(
+  ggLatDepth_temp(
+    dataset = df_plot(),
+    clusterVar = 'Medoid_Clust',
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+)
+
+
+#### Lat Depth ------------------------
+
+output$LatDepth_Ward <- renderPlot({
+  ggLatDepth(
+    dataset = df_plot(),
+    clusterVar = 'Ward_Clust',MedoidName = '',
+    OceanLayers = T,
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+})
+
+output$LatDepth_Medoids <- renderPlot({
+  ggLatDepth(
+    dataset = df_plot(),
+    clusterVar = 'Medoid_Clust',
+    OceanLayers = T,
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+})
+
+#### Abiotics  ------------------------
+##### Ward ----------------------------
+output$Abiotics_Ward_Scatter <- renderPlot({
+   abiotics_ward()$Scatter %>% grid.arrange()
+})
+
+output$Abiotics_Ward_temp <- renderPlot({
+   abiotics_ward()$temp
+})
+
+output$Abiotics_Ward_Salinity <- renderPlot({
+   abiotics_ward()$Salinity
+})
+
+output$Abiotics_Ward_Pressure <- renderPlot({
+   abiotics_ward()$Pressure
+})
+
+##### Medoid ----------------------------
+output$Abiotics_Medoid_Scatter <- renderPlot({
+   abiotics_medoids()$Scatter %>% grid.arrange()
+})
+
+output$Abiotics_Medoid_temp <- renderPlot({
+   abiotics_medoids()$temp
+})
+
+output$Abiotics_Medoid_Salinity <- renderPlot({
+   abiotics_medoids()$Salinity
+})
+
+output$Abiotics_Medoid_Pressure <- renderPlot({
+   abiotics_medoids()$Pressure
+})
+
+
+###### -- MDS 2D
+output$MDS_2D_Ward <- renderPlot({
+  plot_mds2d(
+    df_group = isolate(df_plot()),
+    ClusterVar = 'Ward_Clust',
+    mds_OBJ = isolate(mds_obj())
+    )
+})
+
+
+output$MDS_2D_Medoid <- renderPlot({
+  plot_mds2d(
+    df_group = df_plot(),
+    ClusterVar = 'Medoid_Clust',
+    mds_OBJ = mds_obj())
+})
+
+##### -- MDS 3D
+ output$MDS_3D_Ward <- plotly::renderPlotly({
+   plot_mds3d(
+     df_group = df_plot(),
+     ClusterVar = 'Ward_Clust',
+     mds_OBJ = mds_obj())
+ })
+ 
+ output$MDS_3D_Medoid <- plotly::renderPlotly({
+   plot_mds3d(
+     df_group = df_plot(),
+     ClusterVar = 'Medoid_Clust',
+     mds_OBJ = mds_obj())
+ })
+
+
+### this was working properly
+
+# output$Abiotics_Medoids <- renderPlot({
+#    ggLatDepth_temp(
+#       dataset = df_plot(),
+#            clusterVar = 'Medoid_Clust',
+#            title = '')$Scatter %>% grid.arrange()
+# })
+```
+
+# Other Discussions
+
+```{r,message=FALSE,warning=FALSE}
+#### Loading Packages 
+library(shiny)
+library(tidyverse) ; library(dplyr) ; library(ggplot2)
+library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis)  ; library(plotly)
+
+#### Loading functions 
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ALR_CLR_distMatrices.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/aggregating_composition_new.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
+
+source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_temp.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds3d.R')
+
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R')
+#### Loading data
+
+metadat = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/metadat_abiotic.csv') %>% as_tibble()
+
+dat_tax = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/treated_taxonomy_dat.csv') %>% 
+  as_tibble()
+
+dat_tax = dat_tax %>% mutate(
+  ASV=ifelse(
+    1:nrow(dat_tax)<10,
+    paste('ID000',1:nrow(dat_tax),sep=''),
+    ifelse(1:nrow(dat_tax)<100,
+           paste('ID00',1:nrow(dat_tax),sep=''),
+           ifelse(1:nrow(dat_tax)<1000,
+                  paste('ID0',1:nrow(dat_tax),sep=''),
+                  paste('ID',1:nrow(dat_tax),sep=''))))
+                          
+)
+```
+::: {.panel-tabset}
+
+## Alpha Diversity
+
+Alpha diversity is defined as the mean diversity of species in samples.
+
+First and more straight forward method = counting the number of different ASVs in each sample.
+
+```{r,message=FALSE,warning=FALSE}
+#| layout-ncol: 2
+
+ASV_Over_Samples <- data.frame(
+    ASV_Id = dat_tax$ASV,
+    KeyAsv = 1:length(dat_tax$ASV),
+    PresentInNSamples = 195 - apply(dat_tax %>% select(starts_with("P16")),1,function(x){sum(x==0)})
+    ) %>% arrange(-PresentInNSamples) %>% mutate(ASVNumber=1:n())
+
+Samples_Over_ASV<- data.frame(
+  Sample = dat_tax %>% select(starts_with("P16")) %>% colnames(),
+  NumberOfASVs = apply(dat_tax %>% select(starts_with("P16")),2,function(x){sum(x!=0)}) 
+) %>% arrange(-NumberOfASVs) %>% mutate(SampleNumber= 1:n())
+
+
+ASV_Over_Samples %>% 
+  ggplot(aes(x=ASVNumber,y=PresentInNSamples))+
+  geom_point()+
+  theme_minimal()
+
+Samples_Over_ASV %>% 
+  ggplot(aes(x=SampleNumber,y=NumberOfASVs))+
+  geom_point()+
+  theme_minimal()
+```
+
+## HAC vs Medoids
+
+Here we will understand way we are observing good results in the hierarchical (Ward) clustering when we use ASVs.
+
+::: {.panel-tabset}
+
+### Single Link
+
+Connecting the points that are closer to each other.
+
+The distance between clusters is the minimum distance between observations from those two clusters.
+
+$$D(c_1,c_2) = \min_{x_1\in c_1, x_2 \in c_2} D(x_1,x_2)$$
+
+- Leads to very long chains.
+
+### Complete Link
+Define the distance between two clusters as the maximum pairwise distance between clusters.
+
+$$D(c_1,c_2) = \max_{x_1\in c_1, x_2 \in c_2} D(x_1,x_2)$$
+
+- Forces clusters with consistent "area"
+- Combines clusters that will have the smallest diameter
+
+### Ward D2 method
+It consider joining two clusters and looks to the 'deviation' in relation to the mean. It finds the pair of clusters that leads to minimum increase in total within-cluster variance after merging (increase is a weighted squared distance between cluster centers)
+
+So from $k+1$ to $k$, it groups the two clusters that will have the smallest sum of the deviations. Comparing deviations before and after merging.
+
+$$ \frac{ |A| |B| }{|A\cup B|} || \mu_A - \mu_B ||^2$$
+
+
+
+:::
+
+
+:::
+
+
+
+:::
