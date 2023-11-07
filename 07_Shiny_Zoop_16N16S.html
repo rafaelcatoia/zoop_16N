@@ -3405,7 +3405,7 @@ return!"\t\n\x0B\f\r                　\u2028\u2029
 <p>
 <script type="application/shiny-prerendered" data-context="server">
 #### Loading Packages 
-library(shiny)
+library(shiny) ; library(vegan)
 library(tidyverse) ; library(dplyr) ; library(ggplot2)
 library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis)  ; library(plotly)
 
@@ -3578,9 +3578,9 @@ output$Abiotics_Medoid_Pressure <- renderPlot({
 ###### -- MDS 2D
 output$MDS_2D_Ward <- renderPlot({
   plot_mds2d(
-    df_group = isolate(df_plot()),
+    df_group = df_plot(),
     ClusterVar = 'Ward_Clust',
-    mds_OBJ = isolate(mds_obj())
+    mds_OBJ = mds_obj()
     )
 })
 
