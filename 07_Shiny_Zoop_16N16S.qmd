@@ -217,7 +217,9 @@ selectedData <- reactive({
 
 #### Ward.D2 Clustering
 clusters_hclust <- reactive({
-  cutree(hclust(d =ALR_CLR_distMatrices(selectedData())$dist_Aitchison),input$clustN)})
+  cutree(hclust(d =ALR_CLR_distMatrices(selectedData())$dist_Aitchison,
+                'ward.D2'),
+         input$clustN)})
 
 clusters_kmedoids<- reactive({
   cluster::pam(ALR_CLR_distMatrices(selectedData())$CLR$x.clr,
@@ -409,7 +411,25 @@ dat_tax = dat_tax %>% mutate(
                           
 )
 ```
+
 ::: {.panel-tabset}
+
+## Creating all clusters
+```{r,message=FALSE,warning=FALSE}
+
+
+###### Creating all clusters ---------------------
+vec_aggregation <- 
+  c('PG','SG1','Supergroup','Division',
+    'Class','Order','Family','Genus','Species','ASV')
+
+datadir = "/Users/rafaelcatoia/MyDrive/20_UCSC/Capstone/00_Data/Pacific Ocean/"
+
+list
+
+
+```
+
 
 ## Alpha Diversity
 
@@ -441,42 +461,20 @@ Samples_Over_ASV %>%
   ggplot(aes(x=SampleNumber,y=NumberOfASVs))+
   geom_point()+
   theme_minimal()
+
+
 ```
 
-## HAC vs Medoids
 
-Here we will understand way we are observing good results in the hierarchical (Ward) clustering when we use ASVs.
 
-::: {.panel-tabset}
+## Geospatial Coherence
 
-### Single Link
-
-Connecting the points that are closer to each other.
-
-The distance between clusters is the minimum distance between observations from those two clusters.
-
-$$D(c_1,c_2) = \min_{x_1\in c_1, x_2 \in c_2} D(x_1,x_2)$$
-
-- Leads to very long chains.
-
-### Complete Link
-Define the distance between two clusters as the maximum pairwise distance between clusters.
-
-$$D(c_1,c_2) = \max_{x_1\in c_1, x_2 \in c_2} D(x_1,x_2)$$
-
-- Forces clusters with consistent "area"
-- Combines clusters that will have the smallest diameter
-
-### Ward D2 method
-It consider joining two clusters and looks to the 'deviation' in relation to the mean. It finds the pair of clusters that leads to minimum increase in total within-cluster variance after merging (increase is a weighted squared distance between cluster centers)
-
-So from $k+1$ to $k$, it groups the two clusters that will have the smallest sum of the deviations. Comparing deviations before and after merging.
-
-$$ \frac{ |A| |B| }{|A\cup B|} || \mu_A - \mu_B ||^2$$
+```{r}
 
 
 
-:::
+```
+
 
 
 :::
