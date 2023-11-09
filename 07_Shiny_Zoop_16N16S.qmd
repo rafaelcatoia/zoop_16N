@@ -425,8 +425,16 @@ vec_aggregation <-
 
 datadir = "/Users/rafaelcatoia/MyDrive/20_UCSC/Capstone/00_Data/Pacific Ocean/"
 
-list
+listW2 <- clusterize_hclustW2(data_taxonomy = dat_tax,
+                              vec_aggreg = vec_aggreg,
+                              max_k = 30,max_at_least = 3)
 
+listMedois <- clusterize_kmedoids(data_taxonomy = dat_tax,
+                              vec_aggreg = vec_aggreg,
+                              max_k = 30,max_at_least = 3)
+
+
+length(listW2)
 
 ```
 

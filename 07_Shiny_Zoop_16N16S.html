@@ -3245,11 +3245,7 @@ vertical-align: -.125em;
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true" href>Creating all clusters</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false" href>Alpha Diversity</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false" href>Geospatial Coherence</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>function (...)  .Primitive(&quot;list&quot;)</code></pre>
-</div>
-</div>
+
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <p>Alpha diversity is defined as the mean diversity of species in samples.</p>
@@ -3340,7 +3336,7 @@ selectedData <- reactive({
 
 #### Ward.D2 Clustering
 clusters_hclust <- reactive({
-  cutree(hclust(d =ALR_CLR_distMatrices(selectedData())$dist_Aitchison,
+  cutree(hclust(d =ALR_CLR_distMatrices(selectedData())$dist_Chisq,
                 'ward.D2'),
          input$clustN)})
 
