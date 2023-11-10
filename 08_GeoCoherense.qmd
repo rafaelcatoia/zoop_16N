@@ -425,14 +425,14 @@ datadir = "/Users/rafaelcatoia/MyDrive/20_UCSC/Capstone/00_Data/Pacific Ocean/"
 
 # listW2 <- clusterize_hclustW2(data_taxonomy = dat_tax,
 #                               vec_aggreg = vec_aggreg,
-#                               max_k = 30,max_at_least = 3)
+#                               max_k = 50,max_at_least = 3)
 # 
 # listMedois <- clusterize_kmedoids(data_taxonomy = dat_tax,
 #                               vec_aggreg = vec_aggreg,
-#                               max_k = 30,max_at_least = 3)
-
-#saveRDS(listW2,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
-#saveRDS(listMedois,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
+#                               max_k = 50,max_at_least = 3)
+# 
+# saveRDS(listW2,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
+# saveRDS(listMedois,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
 
 
 listW2<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
@@ -476,106 +476,144 @@ Samples_Over_ASV %>%
 
 ## Geospatial Coherence
 
+Here the idea is to verify if the clusters created in the compositions, are geo-spatial coherent.
+
+The first try was to, given the clusters:
+
+* sum the distances between samples within the same cluster
+   + related to Latitude and Depth - Using the Euclidian distance (no transformations until now)
+   + related to Abiotic Features (Temperature, Salinity and Pressure)
+
+
+
 ```{r}
 ## i is for removing at least
 ## j is for aggregation level
 ## k is for clustersize
 #i=2 ; j = 9, k = 10
 
-# dat_tax_aux <- aggregating_compositions(
-#   dFrame = dat_tax,
-#   fillZeros = 'Nothing',
-#   aggregating_level = vec_aggreg[1],
-#   PresentAtLeast = 1,
-#   metadata = metadat
-# ) %>% mutate(
-#   OBS=1:n()) %>% 
-#   select(OBS,Latitude,Depth,Pressure_decibars,
-#          Salinity_psu,Temperature_degrees_Celsius)
+#  dat_tax_aux <- aggregating_compositions(
+#    dFrame = dat_tax,
+#    fillZeros = 'Nothing',
+#    aggregating_level = vec_aggreg[1],
+#    PresentAtLeast = 1,
+#    metadata = metadat
+#  ) %>% mutate(
+#    OBS=1:n()) %>% 
+#    select(OBS,Latitude,Depth,Pressure_decibars,
+#           Salinity_psu,Temperature_degrees_Celsius)
+#  
+#  outputSS <- list()
+#  kmax = length(listW2$AtLeast1$PG)
+#  for (i in 1:3){
+#    
+#    outputAgg <- list()
+#    for(j in 1:length(vec_aggregation)){
+#      
+#      outputDistances <- list()
+#      for(k in 1:kmax){
+#        
+#        dat_tax_aux = 
+#          dat_tax_aux %>% mutate(
+#          Ward_Clust = factor(listW2[[i]][[j]][[k]]),
+#          Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
+#        
+#        outputDistances[[k]] <- list(Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust'),
+#             Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust'))
+#      }
+#      names(outputDistances) <- ifelse(1:kmax < 10,
+#                                            paste('Cluster0',1:kmax,sep=''),
+#                                            paste('Cluster',1:kmax,sep=''))
+#      outputAgg[[j]]<-outputDistances
+#      rm(outputDistances)
+#    }
+#    
+#    names(outputAgg) <- vec_aggregation
+#    outputSS[[i]] <- outputAgg
+#    rm(outputAgg)
+#  }
+#  
+#  names(outputSS) <- paste('AtLeastIn',1:3,sep='')
+#  
+#  saveRDS(object = outputSS,file = 'outputSS')
+#  outputSS=readRDS('outputSS')
 # 
-# outputSS <- list()
-# kmax = length(listW2$AtLeast1$PG)
-# for (i in 1:3){
-#   
-#   outputAgg <- list()
-#   for(j in 1:length(vec_aggregation)){
-#     
-#     outputDistances <- list()
-#     for(k in 1:kmax){
-#       
-#       dat_tax_aux = 
-#         dat_tax_aux %>% mutate(
-#         Ward_Clust = factor(listW2[[i]][[j]][[k]]),
-#         Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
-#       
-#       outputDistances[[k]] <- list(Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust'),
-#            Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust'))
-#     }
-#     names(outputDistances) <- ifelse(1:kmax < 10,
-#                                           paste('Cluster0',1:kmax,sep=''),
-#                                           paste('Cluster',1:kmax,sep=''))
-#     outputAgg[[j]]<-outputDistances
-#     rm(outputDistances)
-#   }
-#   
-#   names(outputAgg) <- vec_aggregation
-#   outputSS[[i]] <- outputAgg
-#   rm(outputAgg)
-# }
+#  df_outputSS <- outputSS %>% plyr::ldply(function(atleast){
+#    atleast %>% plyr::ldply(function(agglevel){
+#      agglevel %>% plyr::ldply(function(cluster){
+#        cluster %>% plyr::ldply(function(method){
+#          method %>% plyr::ldply(function(dimension){
+#            return(data.frame(TotalSum = sum(dimension$SumDist)))
+#          }, .id = "dimension")
+#        }, .id = "method")
+#      }, .id = "clusters")
+#    }, .id = "agglevel")
+#  }, .id = "atleast")
 # 
-# names(outputSS) <- paste('AtLeastIn',1:3,sep='')
-# 
-# saveRDS(object = outputSS,file = 'outputSS')
-# outputSS=readRDS('outputSS')
-
-# df_outputSS <- outputSS %>% plyr::ldply(function(atleast){
-#   atleast %>% plyr::ldply(function(agglevel){
-#     agglevel %>% plyr::ldply(function(cluster){
-#       cluster %>% plyr::ldply(function(method){
-#         method %>% plyr::ldply(function(dimension){
-#           return(data.frame(TotalSum = sum(dimension$SumDist)))
-#         }, .id = "dimension")
-#       }, .id = "method")
-#     }, .id = "clusters")
-#   }, .id = "agglevel")
-# }, .id = "atleast")
-
-#data.table::fwrite(df_outputSS,'/Users/rafaelcatoia/Desktop/df_outputSS')
+# data.table::fwrite(df_outputSS,'/Users/rafaelcatoia/Desktop/df_outputSS')
 df_outputSS <- data.table::fread('/Users/rafaelcatoia/Desktop/df_outputSS')
 ```
 
+::: {.panel-tabset}
+
+### Lat Depht
 ```{r}
-#|fig-align: center
-#|fig-height: 8
-#|fig-width: 20
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
   filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=TotalSum,color=method,linetype=atleast))+
-  geom_line(linewidth=1,alpha=0.75)+
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
   theme(legend.position = 'bottom')
 ```
 
 ```{r}
-#|fig-align: center
-#|fig-height: 8
-#|fig-width: 20
+df_outputSS %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='GeoSpatial') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  geom_line(linewidth=1,alpha=0.75)+
+  facet_grid(atleast~method)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+
+  viridis::scale_color_viridis(10,discrete = T)
+```
+
+### Abiotics
+```{r}
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
   filter(Dimension=='Abiotics') %>% 
-  ggplot(aes(x=NumberOfClusters,y=TotalSum,color=method,linetype=atleast))+
-  geom_line(linewidth=1,alpha=0.75)+
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
   theme(legend.position = 'bottom')
 ```
 
+```{r}
+df_outputSS %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='Abiotics') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  geom_line(linewidth=1,alpha=0.75)+
+  facet_grid(atleast~method)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+
+  viridis::scale_color_viridis(10,discrete = T)
+```
+
+
+::: 
 
 :::
 
