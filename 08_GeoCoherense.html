@@ -3242,7 +3242,7 @@ vertical-align: -.125em;
 </div>
 <div id="tabset-6-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-3-tab">
 <div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true" href>Creating all clusters</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false" href>Alpha Diversity</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false" href>Geospatial Coherence</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true" href>Creating all clusters</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false" href>Alpha Diversity</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false" href>Geospatial Coherence</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-4" role="tab" aria-controls="tabset-5-4" aria-selected="false" href>Geospatial Coherence 2</a></li></ul>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 
@@ -3301,12 +3301,19 @@ vertical-align: -.125em;
 </div>
 </div>
 </div>
+<div id="tabset-5-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-4-tab">
+<p>Here the idea is to sum the euclidean distance between the medoid of each cluster.</p>
+<p>We are basically, identify the medoid in the compositional scale, and than will sum the distances between</p>
+<section id="abiotics-3" class="level3">
+<h3 data-anchor-id="abiotics-3">Abiotics</h3>
+</section>
 </div>
 </div>
 </div>
 </div>
 </div>
-<p>
+</div>
+<p>::: 
 <script type="application/shiny-prerendered" data-context="server">
 #### Loading Packages 
 library(shiny) ; library(vegan)
@@ -3316,19 +3323,12 @@ library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis
 
 #### Loading functions 
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ALR_CLR_distMatrices.R")
-
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/aggregating_composition_new.R")
-
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
-
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
-
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_temp.R')
-
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
-
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds3d.R')
-
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R')
 
 #### Loading data

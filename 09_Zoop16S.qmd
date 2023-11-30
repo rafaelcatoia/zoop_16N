@@ -395,9 +395,10 @@ dat_tax = dat_tax %>% mutate(
            paste('ID00',1:nrow(dat_tax),sep=''),
            ifelse(1:nrow(dat_tax)<1000,
                   paste('ID0',1:nrow(dat_tax),sep=''),
-                  paste('ID',1:nrow(dat_tax),sep=''))))
+                  paste('ID',1:nrow(dat_tax),sep=''))),)
                           
 )
+
 ```
 
 ::: {.panel-tabset}
@@ -410,21 +411,21 @@ vec_aggregation <-
     'Class','Order','Family','Genus','Species','ASV')
 
 
-datadir = "/Users/rafaelcatoia/MyDrive/20_UCSC/Capstone/00_Data/Pacific Ocean/"
-
+# datadir = "/Users/rafaelcatoia/MyDrive/20_UCSC/Capstone/00_Data/Pacific Ocean/"
+# 
 # listW2 <- clusterize_hclustW2(data_taxonomy = dat_tax,
 #                               vec_aggreg = vec_aggregation,
 #                               max_k = 50,max_at_least = 3)
 # 
 # listMedois <- clusterize_kmedoids(data_taxonomy = dat_tax,
-#                               vec_aggreg = vec_aggregation,
-#                               max_k = 50,max_at_least = 3)
+#                                   vec_aggreg = vec_aggregation,
+#                                   max_k = 50,max_at_least = 3)
 # 
 # saveRDS(listW2,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
 # saveRDS(listMedois,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
-
-#listW2<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
-#listMedois<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
+# 
+listW2<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
+listMedois<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
 ```
 
 
@@ -472,74 +473,143 @@ The first try was to, given the clusters:
    + related to Latitude and Depth - Using the Euclidian distance (no transformations until now)
    + related to Abiotic Features (Temperature, Salinity and Pressure)
 
-
-
 ```{r}
-## i is for removing at least
-## j is for aggregation level
-## k is for clustersize
+# i is for removing at least
+# j is for aggregation level
+# k is for clustersize
 #i=2 ; j = 9, k = 10
 
-#  dat_tax_aux <- aggregating_compositions(
-#    dFrame = dat_tax,
-#    fillZeros = 'Nothing',
-#    aggregating_level = vec_aggregation[1],
-#    PresentAtLeast = 1,
-#    metadata = metadat
-#  ) %>% mutate(
-#    OBS=1:n()) %>% 
-#    select(OBS,Latitude,Depth,Pressure_decibars,
-#           Salinity_psu,Temperature_degrees_Celsius)
+#dat_tax_aux <- aggregating_compositions(
+#  dFrame = dat_tax,
+#  fillZeros = 'Nothing',
+#  aggregating_level = vec_aggregation[1],
+#  PresentAtLeast = 1,
+#  metadata = metadat
+#) %>% mutate(
+#  OBS=1:n()) %>% 
+#  select(OBS,Latitude,Depth,Pressure_decibars,
+#         Salinity_psu,Temperature_degrees_Celsius)
+#
+#outputSS <- list()
+#kmax = length(listW2$AtLeast1$PG)
+#for (i in 1:3){
 #  
-#  outputSS <- list()
-#  kmax = length(listW2$AtLeast1$PG)
-#  for (i in 1:3){
+#  outputAgg <- list()
+#  for(j in 1:length(vec_aggregation)){
 #    
-#    outputAgg <- list()
-#    for(j in 1:length(vec_aggregation)){
+#    outputDistances <- list()
+#    for(k in 1:kmax){
 #      
-#      outputDistances <- list()
-#      for(k in 1:kmax){
-#        
-#        dat_tax_aux = 
-#          dat_tax_aux %>% mutate(
+#      dat_tax_aux = 
+#        dat_tax_aux %>% mutate(
 #          Ward_Clust = factor(listW2[[i]][[j]][[k]]),
 #          Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
-#        
-#        outputDistances[[k]] <- list(Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust'),
-#             Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust'))
-#      }
-#      names(outputDistances) <- ifelse(1:kmax < 10,
-#                                            paste('Cluster0',1:kmax,sep=''),
-#                                            paste('Cluster',1:kmax,sep=''))
-#      outputAgg[[j]]<-outputDistances
-#      rm(outputDistances)
+#      
+#      outputDistances[[k]] <- list(
+#        Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
+#        Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
 #    }
-#    
-#    names(outputAgg) <- vec_aggregation
-#    outputSS[[i]] <- outputAgg
-#    rm(outputAgg)
+#    names(outputDistances) <- ifelse(1:kmax < 10,
+#                                     paste('Cluster0',1:kmax,sep=''),
+#                                     paste('Cluster',1:kmax,sep=''))
+#    outputAgg[[j]]<-outputDistances
+#    rm(outputDistances)
 #  }
 #  
-#  names(outputSS) <- paste('AtLeastIn',1:3,sep='')
-#  
-#  saveRDS(object = outputSS,file = 'outputSS')
-#  outputSS=readRDS('outputSS')
+#  names(outputAgg) <- vec_aggregation
+#  outputSS[[i]] <- outputAgg
+#  rm(outputAgg)
+#}
+#
+#names(outputSS) <- paste('AtLeastIn',1:3,sep='')
+#
+#saveRDS(object = outputSS,file = 'outputSS')
+#outputSS=readRDS('outputSS')
+#
+#df_outputSS <- outputSS %>% plyr::ldply(function(atleast){
+#  atleast %>% plyr::ldply(function(agglevel){
+#    agglevel %>% plyr::ldply(function(cluster){
+#      cluster %>% plyr::ldply(function(method){
+#        method %>% plyr::ldply(function(dimension){
+#          return(data.frame(TotalSum = sum(dimension$SumDist)))
+#        }, .id = "dimension")
+#      }, .id = "method")
+#    }, .id = "clusters")
+#  }, .id = "agglevel")
+#}, .id = "atleast")
 # 
-#  df_outputSS <- outputSS %>% plyr::ldply(function(atleast){
-#    atleast %>% plyr::ldply(function(agglevel){
-#      agglevel %>% plyr::ldply(function(cluster){
-#        cluster %>% plyr::ldply(function(method){
-#          method %>% plyr::ldply(function(dimension){
-#            return(data.frame(TotalSum = sum(dimension$SumDist)))
-#          }, .id = "dimension")
-#        }, .id = "method")
-#      }, .id = "clusters")
-#    }, .id = "agglevel")
-#  }, .id = "atleast")
-# 
-# data.table::fwrite(df_outputSS,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS.csv')
+#data.table::fwrite(df_outputSS,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS.csv')
 df_outputSS <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS.csv')
+
+
+#######--- Doing the same thing now, but wit the rank instead of the true Depht
+
+# dat_tax_aux <- aggregating_compositions(
+#   dFrame = dat_tax,
+#   fillZeros = 'Nothing',
+#   aggregating_level = vec_aggregation[1],
+#   PresentAtLeast = 1,
+#   metadata = metadat
+# ) %>% mutate(
+#   OBS=1:n()) %>% 
+#   select(OBS,Latitude,Depth,Pressure_decibars,
+#          Salinity_psu,Temperature_degrees_Celsius) %>% 
+#   left_join(
+#     metadat %>% select(Samples,Latitude,Depth) %>% 
+#   arrange(Samples,Depth) %>% 
+#   group_by(Latitude) %>% mutate(DepthRank=1:n()))
+# 
+# outputSS_Rank <- list()
+# kmax = length(listW2$AtLeast1$PG)
+# for (i in 1:3){
+#   
+#   outputAgg <- list()
+#   for(j in 1:length(vec_aggregation)){
+#     
+#     outputDistances <- list()
+#     for(k in 1:kmax){
+#       
+#       dat_tax_aux = 
+#         dat_tax_aux %>% mutate(
+#           Ward_Clust = factor(listW2[[i]][[j]][[k]]),
+#           Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
+#       
+#       outputDistances[[k]] <- list(
+#         Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
+#         Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
+#     }
+#     names(outputDistances) <- ifelse(1:kmax < 10,
+#                                      paste('Cluster0',1:kmax,sep=''),
+#                                      paste('Cluster',1:kmax,sep=''))
+#     outputAgg[[j]]<-outputDistances
+#     rm(outputDistances)
+#   }
+#   
+#   names(outputAgg) <- vec_aggregation
+#   outputSS_Rank[[i]] <- outputAgg
+#   rm(outputAgg)
+# }
+# 
+# names(outputSS_Rank) <- paste('AtLeastIn',1:3,sep='')
+# 
+# saveRDS(object = outputSS_Rank,file = 'outputSS_Rank')
+# outputSS_Rank=readRDS('outputSS_Rank')
+# 
+# df_outputSS_Rank <- outputSS_Rank %>% plyr::ldply(function(atleast){
+#   atleast %>% plyr::ldply(function(agglevel){
+#     agglevel %>% plyr::ldply(function(cluster){
+#       cluster %>% plyr::ldply(function(method){
+#         method %>% plyr::ldply(function(dimension){
+#           return(data.frame(TotalSum = sum(dimension$SumDist)))
+#         }, .id = "dimension")
+#       }, .id = "method")
+#     }, .id = "clusters")
+#   }, .id = "agglevel")
+# }, .id = "atleast")
+
+data.table::fwrite(df_outputSS_Rank,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_Rank.csv')
+df_outputSS <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS.csv')
+
 ```
 
 ::: {.panel-tabset}
@@ -555,7 +625,18 @@ df_outputSS %>%
   geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom')+ggtitle('Depth')
+
+df_outputSS_Rank %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='GeoSpatial') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  geom_line(linewidth=0.75,alpha=0.75)+
+  facet_wrap(~agglevel,nrow=2)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+ggtitle('Rank-Depth')
 ```
 
 ```{r}
@@ -569,7 +650,19 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)
+  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Depth')
+
+df_outputSS_Rank %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='GeoSpatial') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  geom_line(linewidth=1,alpha=0.75)+
+  facet_grid(atleast~method)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+
+  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Rank-Depth')
 ```
 
 ### Abiotics
@@ -583,7 +676,18 @@ df_outputSS %>%
   geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
-  theme(legend.position = 'bottom')
+  theme(legend.position = 'bottom')+ggtitle('Depth')
+
+df_outputSS_Rank %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='Abiotics') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  geom_line(linewidth=0.75,alpha=0.75)+
+  facet_wrap(~agglevel,nrow=2)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+ggtitle('Rank-Depth')
 ```
 
 ```{r}
@@ -597,162 +701,22 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)
-```
+  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Depth')
 
+df_outputSS_Rank %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(Dimension=='Abiotics') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  geom_line(linewidth=1,alpha=0.75)+
+  facet_grid(atleast~method)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')+
+  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Rank-Depth')
+```
 
 ::: 
-
-
-## Geospatial Coherence 2 
-
-Here the idea is to sum the euclidean distance between the medoid of each cluster.
-
-We are basically, identify the  medoid in the compositional scale, and than will sum the distances between 
-
-
-
-
-```{r}
-## i is for removing at least
-## j is for aggregation level
-## k is for clustersize
-#i=2 ; j = 9, k = 10
-
-# listMedois <- readRDS('listMedois')
-# listW2 <- readRDS('listW2')
-# 
-# 
-# 
-# dat_tax_aux <- aggregating_compositions(
-#   dFrame = dat_tax,
-#   fillZeros = 'Nothing',
-#   aggregating_level = vec_aggregation[1],
-#   PresentAtLeast = 1,
-#   metadata = metadat
-# ) %>% mutate(
-#   OBS=1:n()) %>% 
-#   select(OBS,Latitude,Depth,Pressure_decibars,
-#          Salinity_psu,Temperature_degrees_Celsius)
-#   
-#   outputSS <- list()
-#   kmax = 50
-#   for (i in 1:3){
-#     
-#     outputAgg <- list()
-#     for(j in 1:length(vec_aggregation)){
-#       
-#       outputDistances <- list()
-#       for(k in 1:kmax){
-#         
-#         for(l in 1:)
-#         dat_tax_aux = dat_tax_aux <- aggregating_compositions(
-#           dFrame = dat_tax,
-#           fillZeros = 'Nothing',
-#           aggregating_level = vec_aggregation[j],
-#           PresentAtLeast = i,
-#           metadata = metadat
-#         ) %>% mutate(
-#           ClustMedoid=listMedois[[i]][[j]][,k],
-#           ClustHclustW=listW2[[i]][[j]][,k]
-#         )
-#         
-#         compvars <- colnames(dat_tax_aux)
-#         compvars[compvars]
-#         
-#         outputDistances[[k]] <- list(Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust'),
-#              Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust'))
-#       }
-#       names(outputDistances) <- ifelse(1:kmax < 10,
-#                                             paste('Cluster0',1:kmax,sep=''),
-#                                             paste('Cluster',1:kmax,sep=''))
-#       outputAgg[[j]]<-outputDistances
-#       rm(outputDistances)
-#     }
-#     
-#     names(outputAgg) <- vec_aggregation
-#     outputSS[[i]] <- outputAgg
-#     rm(outputAgg)
-#   }
-#   
-#   names(outputSS) <- paste('AtLeastIn',1:3,sep='')
-#   
-#   saveRDS(object = outputSS,file = 'outputSS')
-#   outputSS=readRDS('outputSS')
-#  
-#   df_outputSS <- outputSS %>% plyr::ldply(function(atleast){
-#     atleast %>% plyr::ldply(function(agglevel){
-#       agglevel %>% plyr::ldply(function(cluster){
-#         cluster %>% plyr::ldply(function(method){
-#           method %>% plyr::ldply(function(dimension){
-#             return(data.frame(TotalSum = sum(dimension$SumDist)))
-#           }, .id = "dimension")
-#         }, .id = "method")
-#       }, .id = "clusters")
-#     }, .id = "agglevel")
-#   }, .id = "atleast")
-#  
-#  data.table::fwrite(df_outputSS,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS.csv')
-# df_outputSS <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_output# SS.csv')
-# ```
-# 
-# ::: {.panel-tabset}
-# 
-# ### Lat Depht
-# ```{r}
-# df_outputSS %>% 
-#   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-#          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-#          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-#   filter(Dimension=='GeoSpatial') %>% 
-#   ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
-#   geom_line(linewidth=0.75,alpha=0.75)+
-#   facet_wrap(~agglevel,nrow=2)+
-#   theme_minimal()+
-#   theme(legend.position = 'bottom')
-```
-
-```{r}
-# df_outputSS %>% 
-#   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-#          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-#          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-#   filter(Dimension=='GeoSpatial') %>% 
-#   ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
-#   geom_line(linewidth=1,alpha=0.75)+
-#   facet_grid(atleast~method)+
-#   theme_minimal()+
-#   theme(legend.position = 'bottom')+
-#   viridis::scale_color_viridis(10,discrete = T)
-```
-
-### Abiotics
-```{r}
-# df_outputSS %>% 
-#   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-#          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-#          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-#   filter(Dimension=='Abiotics') %>% 
-#   ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
-#   geom_line(linewidth=0.75,alpha=0.75)+
-#   facet_wrap(~agglevel,nrow=2)+
-#   theme_minimal()+
-#   theme(legend.position = 'bottom')
-```
-
-```{r}
-#df_outputSS %>% 
-#  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-#         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-#         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-#  filter(Dimension=='Abiotics') %>% 
-#  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
-#  geom_line(linewidth=1,alpha=0.75)+
-#  facet_grid(atleast~method)+
-#  theme_minimal()+
-#  theme(legend.position = 'bottom')+
-#  viridis::scale_color_viridis(10,discrete = T)
-```
 
 
 ::: 
