@@ -7,7 +7,7 @@
 ###### ASVs present in less then max_at_least.
 ###### moment = 'After' means that we will remove the
 ###### AGG that are present in less then max_at_least
-clusterize_MixDist <- function(
+clusterize_MixDist_kmedoids <- function(
     data_taxonomy,
     data_metadat,
     vec_aggreg,
@@ -54,16 +54,9 @@ clusterize_MixDist <- function(
         
         FinalDist = propGeo*GeoDist+ (1-propGeo)*AitchisonDist
         
-        
-        hclust_obj <- hclust(d = FinalDist,
-               method = 'ward.D2')
-        
-        dframe_clusters <- as.data.frame(
-          matrix(NA,nrow = nrow(clrObj$CLR$x.clr),ncol=max_k)
-          )
-        
         for(k in 1:max_k){
-          dframe_clusters[,k] <- cutree(hclust_obj,k = k)
+          dframe_clusters[,k] <- cluster::pam(x=FinalDist, k = k,
+                                              stand = FALSE,cluster.only = T)
         }
       
         colnames(dframe_clusters) <- ifelse(1:max_k < 10,

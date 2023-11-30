@@ -7,7 +7,7 @@
 ###### ASVs present in less then max_at_least.
 ###### moment = 'After' means that we will remove the
 ###### AGG that are present in less then max_at_least
-clusterize_MixDist <- function(
+clusterize_MixDist_hclustW2 <- function(
     data_taxonomy,
     data_metadat,
     vec_aggreg,
