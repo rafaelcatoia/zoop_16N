@@ -8,9 +8,6 @@ server: shiny
 ---
 ::: panel-tabset
 
-# What you are going to find here
-
-
 # Clustering Methods
 
 :::: {.columns}
@@ -35,7 +32,7 @@ vars <- vec_aggregation
  #numericInput('clusters', 'Cluster count', 3, min = 1, max = 9)
 RemMoment <- c('Before','After')
 CHull = c("N","Y")
-DephtRank = c("N","Y")
+DephtRank = c("Y","N")
 selectInput('aggLevel', 'Aggregation Level',selected = 1,vars)
 numericInput('clustN', 'Cluster count', 10, min = 1, max = 40)
 numericInput('AtLeastN','ASVs in at least',1,min=1,max=5)
@@ -183,7 +180,7 @@ plotOutput('MDS_2D_Medoid_Mix')
 ```
 
 :::
-:::
+
 
 
 :::
@@ -207,6 +204,7 @@ source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds3d.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R')
+source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/MixDist_Clust.R')
 
 #### Loading data
 metadat = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/metadat_abiotic.csv') %>% as_tibble()
@@ -264,7 +262,8 @@ clusters_mixdist <- reactive({
   MixDist_Clust(metadat_aux = metadat,
                 data_tax_aux = selectedData(),
                 alphaGeo = input$alphaGeo,
-                DephtRank = input$DephtRank,k_clust = input$clustN)
+                DephtRank = input$DephtRank,
+                k_clust = input$clustN)
 })
 
 

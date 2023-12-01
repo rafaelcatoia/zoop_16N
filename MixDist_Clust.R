@@ -5,10 +5,10 @@
 ## input$AtLeastN = 1
 # input$RemoveMoment = "Before"
 
-MixDist_Clust <- function(metadat_aux,data_tax_aux,alphaGeo,DephtRank='Y',k_clust){
+MixDist_Clust <- function(metadat_aux,data_tax_aux,alphaGeo,depthRank='Y',k_clust){
   AitDist <- ALR_CLR_distMatrices(data_tax_aux)$dist_Aitchison
   
-  if(DepthRank=='Y'){
+  if(depthRank=='Y'){
     metadat_aux <- metadat_aux %>%
       select(-Depth) %>% 
       left_join(metadat_aux %>% 
