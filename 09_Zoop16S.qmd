@@ -262,7 +262,7 @@ clusters_mixdist <- reactive({
   MixDist_Clust(metadat_aux = metadat,
                 data_tax_aux = selectedData(),
                 alphaGeo = input$alphaGeo,
-                DephtRank = input$DephtRank,
+                depthRank = input$DephtRank,
                 k_clust = input$clustN)
 })
 

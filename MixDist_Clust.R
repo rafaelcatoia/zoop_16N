@@ -17,7 +17,7 @@ MixDist_Clust <- function(metadat_aux,data_tax_aux,alphaGeo,depthRank='Y',k_clus
                   group_by(Latitude) %>% mutate(Depth=1:n()))
   }
   
-  metadat_aux <- metadat_aux %>% left_join(metadat_aux %>% select(Samples,Latitude,Depth))
+  data_tax_aux <- data_tax_aux %>% left_join(metadat_aux %>% select(Samples,Latitude,Depth))
   GeoDist <- metadat_aux %>% select(Latitude,Depth) %>% dist()
   ## Mixing the distances
   GeoDist = GeoDist/max(GeoDist)
