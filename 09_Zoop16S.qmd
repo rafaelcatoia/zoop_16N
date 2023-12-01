@@ -149,7 +149,6 @@ plotOutput('MDS_2D_Medoid')
 plotly::plotlyOutput('MDS_3D_Medoid',width = 'auto',height = 'auto')
 ```
 
-:::
 
 ## DistMix - Ward
 
@@ -179,6 +178,7 @@ plotOutput('LatDepth_Medoid_Mix',height = '600px')
 plotOutput('MDS_2D_Medoid_Mix')
 ```
 
+:::
 :::
 
 
