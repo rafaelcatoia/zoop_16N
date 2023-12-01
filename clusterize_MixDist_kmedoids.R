@@ -16,7 +16,7 @@ clusterize_MixDist_kmedoids <- function(
     moment='Before',DepthRank=T,propGeo=0.2){
   
   
-  if(DepthRank){
+  if(DepthRank=='Y'){
     
     data_metadat <- data_metadat %>%
       select(-Depth) %>% 

@@ -35,11 +35,18 @@ vars <- vec_aggregation
  #numericInput('clusters', 'Cluster count', 3, min = 1, max = 9)
 RemMoment <- c('Before','After')
 CHull = c("N","Y")
+DephtRank = c("N","Y")
 selectInput('aggLevel', 'Aggregation Level',selected = 1,vars)
 numericInput('clustN', 'Cluster count', 10, min = 1, max = 40)
 numericInput('AtLeastN','ASVs in at least',1,min=1,max=5)
 selectInput('RemoveMoment','Remove b/a Agg.',selected = 1,RemMoment)
 selectInput('CHull','Convex Hull N/Y',selected = 1,CHull)
+sliderInput(inputId = "alphaGeo",
+                  label = "Geo weight",
+                  min = 0,
+                  max = 1,step = 0.1,value = 0.1)  
+
+selectInput('DephtRank','Depht as Rank N/Y',selected = 1,DephtRank)
 ```
 :::
 
@@ -146,6 +153,39 @@ plotly::plotlyOutput('MDS_3D_Medoid',width = 'auto',height = 'auto')
 ```
 
 :::
+
+## DistMix - Ward
+
+::: {.panel-tabset}
+
+### Ward 
+
+```{r}
+#| panel: center
+plotOutput('LatDepth_Ward_Mix',height = '600px')
+```
+
+```{r}
+#| panel: center
+plotOutput('MDS_2D_Ward_Mix')
+```
+
+### Medoid 
+
+```{r}
+#| panel: center
+plotOutput('LatDepth_Medoid_Mix',height = '600px')
+```
+
+```{r}
+#| panel: center
+plotOutput('MDS_2D_Medoid_Mix')
+```
+
+:::
+:::
+
+
 :::
 ::::
 
@@ -171,9 +211,7 @@ source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R
 #### Loading data
 metadat = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/metadat_abiotic.csv') %>% as_tibble()
 
-dat_tax = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/treated_taxonomy_dat.csv') %>% 
-  as_tibble()
-
+dat_tax = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/treated_taxonomy_dat.csv') %>% as_tibble()
 dat_tax = dat_tax %>% mutate(
   ASV=ifelse(
     1:nrow(dat_tax)<10,
@@ -214,10 +252,21 @@ clusters_hclust <- reactive({
                 'ward.D2'),
          input$clustN)})
 
+#### Ward.D2 Medoid Clustering
 clusters_kmedoids<- reactive({
   cluster::pam(ALR_CLR_distMatrices(selectedData())$CLR$x.clr,
                k = input$clustN,cluster.only = T)
 })
+
+
+#### MixDist Clustering
+clusters_mixdist <- reactive({
+  MixDist_Clust(metadat_aux = metadat,
+                data_tax_aux = selectedData(),
+                alphaGeo = input$alphaGeo,
+                DephtRank = input$DephtRank,k_clust = input$clustN)
+})
+
 
 #### Storing it in the dataset
 
@@ -232,7 +281,9 @@ df_plot <- reactive({
   ) %>% mutate(
     OBS=1:n(),
     Ward_Clust = as.factor(clusters_hclust()),
-    Medoid_Clust = as.factor(clusters_kmedoids())
+    Medoid_Clust = as.factor(clusters_kmedoids()),
+    MixMedoid_Clust = as.factor(clusters_mixdist()$MedoidClust),
+    MixWard_Clust = as.factor(clusters_mixdist()$WardClust)
     #Medoid  = factor(ifelse(OBS%in%medoid_clust$id.med,1,0))
   )
 })
@@ -261,6 +312,23 @@ abiotics_medoids <- reactive(
     title = '')
 )
 
+######## 
+# abioticsMix_medoids <- reactive(
+#   ggLatDepth_temp(
+#     dataset = df_plot(),
+#     clusterVar = 'MixMedoid_Clust',
+#     CHull = ifelse(input$CHull=='Y',T,F),
+#     title = '')
+# )
+# 
+# abioticsMix_ward <- reactive(
+#   ggLatDepth_temp(
+#     dataset = df_plot(),
+#     clusterVar = 'MixWard_Clust',
+#     CHull = ifelse(input$CHull=='Y',T,F),
+#     title = '')
+# )
+
 
 #### Lat Depth ------------------------
 
@@ -277,6 +345,26 @@ output$LatDepth_Medoids <- renderPlot({
   ggLatDepth(
     dataset = df_plot(),
     clusterVar = 'Medoid_Clust',
+    OceanLayers = T,
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+})
+
+
+###### --- Mix
+output$LatDepth_Ward_Mix <- renderPlot({
+  ggLatDepth(
+    dataset = df_plot(),
+    clusterVar = 'MixWard_Clust',MedoidName = '',
+    OceanLayers = T,
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+})
+
+output$LatDepth_Medoid_Mix <- renderPlot({
+  ggLatDepth(
+    dataset = df_plot(),
+    clusterVar = 'MixMedoid_Clust',
     OceanLayers = T,
     CHull = ifelse(input$CHull=='Y',T,F),
     title = '')
@@ -335,6 +423,23 @@ output$MDS_2D_Medoid <- renderPlot({
     mds_OBJ = mds_obj())
 })
 
+####--------- Mix
+output$MDS_2D_Ward_Mix <- renderPlot({
+  plot_mds2d(
+    df_group = df_plot(),
+    ClusterVar = 'MixWard_Clust',
+    mds_OBJ = mds_obj()
+    )
+})
+
+
+output$MDS_2D_Medoid_Mix <- renderPlot({
+  plot_mds2d(
+    df_group = df_plot(),
+    ClusterVar = 'MixMedoid_Clust',
+    mds_OBJ = mds_obj())
+})
+
 ##### -- MDS 3D
  output$MDS_3D_Ward <- plotly::renderPlotly({
    plot_mds3d(
@@ -342,6 +447,7 @@ output$MDS_2D_Medoid <- renderPlot({
      ClusterVar = 'Ward_Clust',
      mds_OBJ = mds_obj())
  })
+ 
  
  output$MDS_3D_Medoid <- plotly::renderPlotly({
    plot_mds3d(
@@ -395,7 +501,7 @@ dat_tax = dat_tax %>% mutate(
            paste('ID00',1:nrow(dat_tax),sep=''),
            ifelse(1:nrow(dat_tax)<1000,
                   paste('ID0',1:nrow(dat_tax),sep=''),
-                  paste('ID',1:nrow(dat_tax),sep=''))),)
+                  paste('ID',1:nrow(dat_tax),sep=''))))
                           
 )
 
@@ -424,14 +530,14 @@ vec_aggregation <-
 # saveRDS(listW2,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
 # saveRDS(listMedois,file = "/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
 # 
-listW2<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
-listMedois<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
+#listW2<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listW2")
+#listMedois<-readRDS("/Users/rafaelcatoia/Desktop/repos/Capstone/listMedois")
 ```
 
 
-## Alpha Diversity
+## How Diverse is each sample
 
-Alpha diversity is defined as the mean diversity of species in samples.
+In process
 
 First and more straight forward method = counting the number of different ASVs in each sample.
 
@@ -465,97 +571,123 @@ Samples_Over_ASV %>%
 ## Mixture of Distance Matrices
 
 ```{r}
-## Creating all Clusters
-listW2 <- clusterize_MixDist_hclustW2(
-  data_taxonomy = dat_tax,
-  vec_aggreg = vec_aggregation,
-  data_metadat = metadat,
-  max_k = 50,max_at_least = 3)
-
-listMedois <- clusterize_MixDist_kmedoids(
-  data_taxonomy = dat_tax,
-  vec_aggreg = vec_aggregation,
-  data_metadat = metadat,
-  max_k = 50,max_at_least = 3)
-
-
-##### Calculating geocoherence ------------------
-
-########### i is for removing at least
-########### j is for aggregation level
-########### k is for clustersize
-########### i=2 ; j = 9, k = 10
-
-# dat_tax_aux <- aggregating_compositions(
-#   dFrame = dat_tax,
-#   fillZeros = 'Nothing',
-#   aggregating_level = vec_aggregation[1],
-#   PresentAtLeast = 1,
-#   metadata = metadat
-# ) %>% mutate(
-#   OBS=1:n()) %>% 
-#   select(OBS,Latitude,Depth,Pressure_decibars,
-#          Salinity_psu,Temperature_degrees_Celsius) %>% 
-#   left_join(
-#     metadat %>% select(Samples,Latitude,Depth) %>% 
-#       arrange(Samples,Depth) %>% 
-#       group_by(Latitude) %>% mutate(DepthRank=1:n()))
+# ## Creating all Clusters
+# listW2 <- clusterize_MixDist_hclustW2(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   max_k = 50,max_at_least = 3)
+# 
+# listMedois <- clusterize_MixDist_kmedoids(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   max_k = 50,max_at_least = 3)
 # 
 # 
-# outputSS_MixDist <- list()
-# kmax = length(listW2$AtLeast1$PG)
-# for (i in 1:3){
-#   
-#   outputAgg <- list()
-#   for(j in 1:length(vec_aggregation)){
-#     
-#     outputDistances <- list()
-#     for(k in 1:kmax){
-#       
-#       dat_tax_aux = 
-#         dat_tax_aux %>% mutate(
-#           Ward_Clust = factor(listW2[[i]][[j]][[k]]),
-#           Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
-#       
-#       outputDistances[[k]] <- list(
-#         Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
-#         Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
-#     }
-#     names(outputDistances) <- ifelse(1:kmax < 10,
-#                                      paste('Cluster0',1:kmax,sep=''),
-#                                      paste('Cluster',1:kmax,sep=''))
-#     outputAgg[[j]]<-outputDistances
-#     rm(outputDistances)
-#   }
-#   
-#   names(outputAgg) <- vec_aggregation
-#   outputSS_MixDist[[i]] <- outputAgg
-#   rm(outputAgg)
-# }
+# ##### Calculating geocoherence ------------------
 # 
-# names(outputSS_MixDist) <- paste('AtLeastIn',1:3,sep='')
+# ########### i is for removing at least
+# ########### j is for aggregation level
+# ########### k is for clustersize
+# ########### i=2 ; j = 9, k = 10
 # 
-# saveRDS(object = outputSS_MixDist,file = 'outputSS_MixDist')
-outputSS_MixDist=readRDS('outputSS_MixDist')
-
-df_outputSS_MixDist <- outputSS_MixDist %>% plyr::ldply(function(atleast){
-  atleast %>% plyr::ldply(function(agglevel){
-    agglevel %>% plyr::ldply(function(cluster){
-      cluster %>% plyr::ldply(function(method){
-        method %>% plyr::ldply(function(dimension){
-          return(data.frame(TotalSum = sum(dimension$SumDist)))
-        }, .id = "dimension")
-      }, .id = "method")
-    }, .id = "clusters")
-  }, .id = "agglevel")
-}, .id = "atleast")
- 
-data.table::fwrite(df_outputSS_MixDist,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist.csv')
+# # dat_tax_aux <- aggregating_compositions(
+# #   dFrame = dat_tax,
+# #   fillZeros = 'Nothing',
+# #   aggregating_level = vec_aggregation[1],
+# #   PresentAtLeast = 1,
+# #   metadata = metadat
+# # ) %>% mutate(
+# #   OBS=1:n()) %>% 
+# #   select(OBS,Latitude,Depth,Pressure_decibars,
+# #          Salinity_psu,Temperature_degrees_Celsius) %>% 
+# #   left_join(
+# #     metadat %>% select(Samples,Latitude,Depth) %>% 
+# #       arrange(Samples,Depth) %>% 
+# #       group_by(Latitude) %>% mutate(DepthRank=1:n()))
+# # 
+# # 
+# # outputSS_MixDist <- list()
+# # kmax = length(listW2$AtLeast1$PG)
+# # for (i in 1:3){
+# #   
+# #   outputAgg <- list()
+# #   for(j in 1:length(vec_aggregation)){
+# #     
+# #     outputDistances <- list()
+# #     for(k in 1:kmax){
+# #       
+# #       dat_tax_aux = 
+# #         dat_tax_aux %>% mutate(
+# #           Ward_Clust = factor(listW2[[i]][[j]][[k]]),
+# #           Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
+# #       
+# #       outputDistances[[k]] <- list(
+# #         Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
+# #         Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
+# #     }
+# #     names(outputDistances) <- ifelse(1:kmax < 10,
+# #                                      paste('Cluster0',1:kmax,sep=''),
+# #                                      paste('Cluster',1:kmax,sep=''))
+# #     outputAgg[[j]]<-outputDistances
+# #     rm(outputDistances)
+# #   }
+# #   
+# #   names(outputAgg) <- vec_aggregation
+# #   outputSS_MixDist[[i]] <- outputAgg
+# #   rm(outputAgg)
+# # }
+# # 
+# # names(outputSS_MixDist) <- paste('AtLeastIn',1:3,sep='')
+# # 
+# # saveRDS(object = outputSS_MixDist,file = 'outputSS_MixDist')
+# outputSS_MixDist=readRDS('outputSS_MixDist')
+# 
+# df_outputSS_MixDist <- outputSS_MixDist %>% plyr::ldply(function(atleast){
+#   atleast %>% plyr::ldply(function(agglevel){
+#     agglevel %>% plyr::ldply(function(cluster){
+#       cluster %>% plyr::ldply(function(method){
+#         method %>% plyr::ldply(function(dimension){
+#           return(data.frame(TotalSum = sum(dimension$SumDist)))
+#         }, .id = "dimension")
+#       }, .id = "method")
+#     }, .id = "clusters")
+#   }, .id = "agglevel")
+# }, .id = "atleast")
+#  
+# data.table::fwrite(df_outputSS_MixDist,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist.csv')
 df_outputSS_MixDist <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist.csv')
 ```
 
+### Lat Depht Plots
+
+```{r}
+
+```
 
 
+::: {.panel-tabset}
+
+#### Hclust
+::: {.panel-tabset}
+##### Dist Prop 0.1 
+
+##### Dist Prop 0.2
+
+##### Dist Prop 0.5
+:::
+
+#### Medoid
+::: {.panel-tabset}
+##### Dist Prop 0.1 
+
+##### Dist Prop 0.2
+
+##### Dist Prop 0.5
+:::
+
+:::
 
 ## Geospatial Coherence
 
