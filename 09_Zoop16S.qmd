@@ -659,36 +659,198 @@ Samples_Over_ASV %>%
 #  
 # data.table::fwrite(df_outputSS_MixDist,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist.csv')
 df_outputSS_MixDist <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist.csv')
+df_outputSS_MixDist_0.2 = df_outputSS_MixDist %>% mutate(AlphaGeo=0.2)
 ```
 
-### Lat Depht Plots
 
 ```{r}
-
+## Creating all Clusters
+# listW2 <- clusterize_MixDist_hclustW2(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   propGeo = 0.1,
+#   max_k = 50,max_at_least = 3)
+# 
+# listMedois <- clusterize_MixDist_kmedoids(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   propGeo = 0.1,
+#   max_k = 50,max_at_least = 3)
+#  
+#  
+# #### Calculating geocoherence ------------------
+# 
+# ########## i is for removing at least
+# ########## j is for aggregation level
+# ########## k is for clustersize
+# ########## i=2 ; j = 9, k = 10
+# 
+#  dat_tax_aux <- aggregating_compositions(
+#    dFrame = dat_tax,
+#    fillZeros = 'Nothing',
+#    aggregating_level = vec_aggregation[1],
+#    PresentAtLeast = 1,
+#    metadata = metadat
+#  ) %>% mutate(
+#    OBS=1:n()) %>% 
+#    select(OBS,Latitude,Depth,Pressure_decibars,
+#           Salinity_psu,Temperature_degrees_Celsius) %>% 
+#    left_join(
+#      metadat %>% select(Samples,Latitude,Depth) %>% 
+#        arrange(Samples,Depth) %>% 
+#        group_by(Latitude) %>% mutate(DepthRank=1:n()))
+#  
+#  
+#  outputSS_MixDist <- list()
+#  kmax = length(listW2$AtLeast1$PG)
+#  for (i in 1:3){
+#    
+#    outputAgg <- list()
+#    for(j in 1:length(vec_aggregation)){
+#      
+#      outputDistances <- list()
+#      for(k in 1:kmax){
+#        
+#        dat_tax_aux = 
+#          dat_tax_aux %>% mutate(
+#            Ward_Clust = factor(listW2[[i]][[j]][[k]]),
+#            Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
+#        
+#        outputDistances[[k]] <- list(
+#          Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
+#          Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
+#      }
+#      names(outputDistances) <- ifelse(1:kmax < 10,
+#                                       paste('Cluster0',1:kmax,sep=''),
+#                                       paste('Cluster',1:kmax,sep=''))
+#      outputAgg[[j]]<-outputDistances
+#      rm(outputDistances)
+#    }
+#    
+#    names(outputAgg) <- vec_aggregation
+#    outputSS_MixDist[[i]] <- outputAgg
+#    rm(outputAgg)
+#  }
+#  
+#  names(outputSS_MixDist) <- paste('AtLeastIn',1:3,sep='')
+#  
+#  saveRDS(object = outputSS_MixDist,file = 'outputSS_MixDist')
+#  outputSS_MixDist=readRDS('outputSS_MixDist')
+#  
+#  df_outputSS_MixDist <- outputSS_MixDist %>% plyr::ldply(function(atleast){
+#    atleast %>% plyr::ldply(function(agglevel){
+#      agglevel %>% plyr::ldply(function(cluster){
+#        cluster %>% plyr::ldply(function(method){
+#          method %>% plyr::ldply(function(dimension){
+#            return(data.frame(TotalSum = sum(dimension$SumDist)))
+#          }, .id = "dimension")
+#        }, .id = "method")
+#      }, .id = "clusters")
+#    }, .id = "agglevel")
+#  }, .id = "atleast")
+#   
+# df_outputSS_MixDist_0.1 = df_outputSS_MixDist %>% mutate(AlphaGeo = 0.1)
+#  
+# data.table::fwrite(df_outputSS_MixDist_0.1,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist_0.1.csv')
+df_outputSS_MixDist_0.1 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.1.csv')
 ```
 
+```{r}
+## Creating all Clusters
+# listW2 <- clusterize_MixDist_hclustW2(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   propGeo = 0.35,
+#   max_k = 50,max_at_least = 3)
+# 
+# listMedois <- clusterize_MixDist_kmedoids(
+#   data_taxonomy = dat_tax,
+#   vec_aggreg = vec_aggregation,
+#   data_metadat = metadat,
+#   propGeo = 0.35,
+#   max_k = 50,max_at_least = 3)
+#  
+#  
+# #### Calculating geocoherence ------------------
+# 
+# ########## i is for removing at least
+# ########## j is for aggregation level
+# ########## k is for clustersize
+# ########## i=2 ; j = 9, k = 10
+# 
+#  dat_tax_aux <- aggregating_compositions(
+#    dFrame = dat_tax,
+#    fillZeros = 'Nothing',
+#    aggregating_level = vec_aggregation[1],
+#    PresentAtLeast = 1,
+#    metadata = metadat
+#  ) %>% mutate(
+#    OBS=1:n()) %>% 
+#    select(OBS,Latitude,Depth,Pressure_decibars,
+#           Salinity_psu,Temperature_degrees_Celsius) %>% 
+#    left_join(
+#      metadat %>% select(Samples,Latitude,Depth) %>% 
+#        arrange(Samples,Depth) %>% 
+#        group_by(Latitude) %>% mutate(DepthRank=1:n()))
+#  
+#  
+#  outputSS_MixDist <- list()
+#  kmax = length(listW2$AtLeast1$PG)
+#  for (i in 1:3){
+#    
+#    outputAgg <- list()
+#    for(j in 1:length(vec_aggregation)){
+#      
+#      outputDistances <- list()
+#      for(k in 1:kmax){
+#        
+#        dat_tax_aux = 
+#          dat_tax_aux %>% mutate(
+#            Ward_Clust = factor(listW2[[i]][[j]][[k]]),
+#            Medoid_Clust = factor(listMedois[[i]][[j]][[k]]))
+#        
+#        outputDistances[[k]] <- list(
+#          Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'DepthRank'),
+#          Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'DepthRank'))
+#      }
+#      names(outputDistances) <- ifelse(1:kmax < 10,
+#                                       paste('Cluster0',1:kmax,sep=''),
+#                                       paste('Cluster',1:kmax,sep=''))
+#      outputAgg[[j]]<-outputDistances
+#      rm(outputDistances)
+#    }
+#    
+#    names(outputAgg) <- vec_aggregation
+#    outputSS_MixDist[[i]] <- outputAgg
+#    rm(outputAgg)
+#  }
+#  
+#  names(outputSS_MixDist) <- paste('AtLeastIn',1:3,sep='')
+#  
+#  saveRDS(object = outputSS_MixDist,file = 'outputSS_MixDist')
+#  outputSS_MixDist=readRDS('outputSS_MixDist')
+#  
+#  df_outputSS_MixDist <- outputSS_MixDist %>% plyr::ldply(function(atleast){
+#    atleast %>% plyr::ldply(function(agglevel){
+#      agglevel %>% plyr::ldply(function(cluster){
+#        cluster %>% plyr::ldply(function(method){
+#          method %>% plyr::ldply(function(dimension){
+#            return(data.frame(TotalSum = sum(dimension$SumDist)))
+#          }, .id = "dimension")
+#        }, .id = "method")
+#      }, .id = "clusters")
+#    }, .id = "agglevel")
+#  }, .id = "atleast")
+#   
+# df_outputSS_MixDist_0.35 = df_outputSS_MixDist %>% mutate(AlphaGeo = 0.35)
+#  
+# data.table::fwrite(df_outputSS_MixDist_0.35,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist_0.35.csv')
+df_outputSS_MixDist_0.35 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.35.csv')
+```
 
-::: {.panel-tabset}
-
-#### Hclust
-::: {.panel-tabset}
-##### Dist Prop 0.1 
-
-##### Dist Prop 0.2
-
-##### Dist Prop 0.5
-:::
-
-#### Medoid
-::: {.panel-tabset}
-##### Dist Prop 0.1 
-
-##### Dist Prop 0.2
-
-##### Dist Prop 0.5
-:::
-
-:::
 
 ## Geospatial Coherence
 
@@ -856,7 +1018,7 @@ df_outputSS %>%
   geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('Depth')
+  theme(legend.position = 'bottom')
 
 
 df_outputSS %>% 
@@ -869,62 +1031,43 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Depth')
+  viridis::scale_color_viridis(10,discrete = T)
 ```
 
 
 #### Rank
 
 ```{r}
-df_outputSS_Rank %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+bind_rows(
+  df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
+  df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
+  df_outputSS_MixDist_0.2 %>% mutate(Dist='Rank',AlphaGeo = '0.2'),
+  df_outputSS_MixDist_0.35 %>% mutate(Dist='Rank',AlphaGeo = '0.35')
+) %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  filter(Dimension=='GeoSpatial',agglevel!='PG',agglevel!='SG1') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=AlphaGeo,linetype=method))+
   geom_line(linewidth=0.75,alpha=0.75)+
-  facet_wrap(~agglevel,nrow=2)+
+  facet_grid(atleast~agglevel)+
   theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('Rank-Depth')
+  theme(legend.position = 'bottom')
 
-df_outputSS_Rank %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+bind_rows(
+  df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
+  df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
+  df_outputSS_MixDist_0.2 %>% mutate(Dist='Rank',AlphaGeo = '0.2'),
+  df_outputSS_MixDist_0.35 %>% mutate(Dist='Rank',AlphaGeo = '0.35')
+)  %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  filter(Dimension=='GeoSpatial',agglevel!='PG',agglevel!='SG1') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel,linetype=method))+
   geom_line(linewidth=1,alpha=0.75)+
-  facet_grid(atleast~method)+
+  facet_grid(atleast~AlphaGeo)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Rank-Depth')
-```
-
-#### Mixture of DistMatrices
-```{r}
-df_outputSS_MixDist  %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
-  geom_line(linewidth=0.75,alpha=0.75)+
-  facet_wrap(~agglevel,nrow=2)+
-  theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('MixDist-0.2')
-
-
-df_outputSS_MixDist %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
-  geom_line(linewidth=1,alpha=0.75)+
-  facet_grid(atleast~method)+
-  theme_minimal()+
-  theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('MixDist-0.2')
+  viridis::scale_color_viridis(discrete = T)
 ```
 
 :::
@@ -946,7 +1089,7 @@ df_outputSS %>%
   geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('Depth')
+  theme(legend.position = 'bottom')
 
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
@@ -958,59 +1101,41 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Depth')
+  viridis::scale_color_viridis(10,discrete = T)
 ```
 
 #### Rank
 ```{r}
-df_outputSS_Rank %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+bind_rows(
+  df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
+  df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
+  df_outputSS_MixDist_0.2 %>% mutate(Dist='Rank',AlphaGeo = '0.2'),
+  df_outputSS_MixDist_0.35 %>% mutate(Dist='Rank',AlphaGeo = '0.35')
+) %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='Abiotics') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  filter(Dimension=='Abiotics',agglevel!='PG',agglevel!='SG1') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=AlphaGeo,linetype=method))+
   geom_line(linewidth=0.75,alpha=0.75)+
-  facet_wrap(~agglevel,nrow=2)+
+  facet_grid(atleast~agglevel)+
   theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('Rank-Depth')
+  theme(legend.position = 'bottom')
 
-df_outputSS_Rank %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+bind_rows(
+  df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
+  df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
+  df_outputSS_MixDist_0.2 %>% mutate(Dist='Rank',AlphaGeo = '0.2'),
+  df_outputSS_MixDist_0.35 %>% mutate(Dist='Rank',AlphaGeo = '0.35')
+)  %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
          agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='Abiotics') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  filter(Dimension=='Abiotics',agglevel!='PG',agglevel!='SG1') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel,linetype=method))+
   geom_line(linewidth=1,alpha=0.75)+
-  facet_grid(atleast~method)+
+  facet_grid(atleast~AlphaGeo)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('Rank-Depth')
-```
-
-#### Mixture of DistMatrices
-```{r}
-df_outputSS_MixDist %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='Abiotics') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
-  geom_line(linewidth=0.75,alpha=0.75)+
-  facet_wrap(~agglevel,nrow=2)+
-  theme_minimal()+
-  theme(legend.position = 'bottom')+ggtitle('MixDist-0.2')
-
-df_outputSS_MixDist %>% 
-  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
-         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
-  filter(Dimension=='Abiotics') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
-  geom_line(linewidth=1,alpha=0.75)+
-  facet_grid(atleast~method)+
-  theme_minimal()+
-  theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)+ggtitle('MixDist-0.2')
+  viridis::scale_color_viridis(discrete = T)
 ```
 
 ::: 
