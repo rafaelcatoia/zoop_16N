@@ -256,6 +256,7 @@ clusters_kmedoids<- reactive({
                k = input$clustN,cluster.only = T)
 })
 
+browser()
 
 #### MixDist Clustering
 clusters_mixdist <- reactive({
@@ -283,7 +284,6 @@ df_plot <- reactive({
     Medoid_Clust = as.factor(clusters_kmedoids()),
     MixMedoid_Clust = as.factor(clusters_mixdist()$MedoidClust),
     MixWard_Clust = as.factor(clusters_mixdist()$WardClust)
-    #Medoid  = factor(ifelse(OBS%in%medoid_clust$id.med,1,0))
   )
 })
 
