@@ -10,8 +10,7 @@ MixDist_Clust <- function(
     alphaGeo,
     depthRank='Y',
     ABS_Latitude=F,
-    k_clust,
-    ){
+    k_clust){
   AitDist <- ALR_CLR_distMatrices(data_tax_aux)$dist_Aitchison
   
   if(depthRank=='Y'){

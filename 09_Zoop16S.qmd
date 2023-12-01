@@ -1,5 +1,5 @@
 ---
-title: "Zooplankton Compostions"
+title: "Zooplankton Compositions"
 format: 
   html:
      page-layout: custom
@@ -33,6 +33,7 @@ vars <- vec_aggregation
 RemMoment <- c('Before','After')
 CHull = c("N","Y")
 DephtRank = c("Y","N")
+ABS_Latitude = c("Y","N")
 selectInput('aggLevel', 'Aggregation Level',selected = 1,vars)
 numericInput('clustN', 'Cluster count', 10, min = 1, max = 40)
 numericInput('AtLeastN','ASVs in at least',1,min=1,max=5)
@@ -41,9 +42,10 @@ selectInput('CHull','Convex Hull N/Y',selected = 1,CHull)
 sliderInput(inputId = "alphaGeo",
                   label = "Geo weight",
                   min = 0,
-                  max = 1,step = 0.1,value = 0.1)  
+                  max = 1,step = 0.05,value = 0.1)  
 
 selectInput('DephtRank','Depht as Rank N/Y',selected = 1,DephtRank)
+selectInput('ABS_Latitude','Abs of the Latitude N/Y',selected = 1,ABS_Latitude)
 ```
 :::
 
@@ -256,7 +258,6 @@ clusters_kmedoids<- reactive({
                k = input$clustN,cluster.only = T)
 })
 
-browser()
 
 #### MixDist Clustering
 clusters_mixdist <- reactive({
@@ -264,6 +265,7 @@ clusters_mixdist <- reactive({
                 data_tax_aux = selectedData(),
                 alphaGeo = input$alphaGeo,
                 depthRank = input$DephtRank,
+                ABS_Latitude=ifelse(input$ABS_Latitude=='Y',T,F),
                 k_clust = input$clustN)
 })
 
