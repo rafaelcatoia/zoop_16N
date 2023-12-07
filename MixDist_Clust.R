@@ -10,25 +10,18 @@ MixDist_Clust <- function(
     alphaGeo=0,
     depthRank='Y',
     ABS_Latitude=F,
-    logDepth=F,
     scalingLatDepth = F,
     k_clust){
   AitDist <- ALR_CLR_distMatrices(data_tax_aux)$dist_Aitchison
   
   if(depthRank=='Y'){
     metadat_aux <- metadat_aux %>%
-      select(-Depth) %>% 
       left_join(metadat_aux %>% 
                   select(Samples,Latitude,Depth) %>% 
-                  arrange(Depth) %>% mutate(Depth=1:n()))
+                  arrange(Depth) %>% mutate(Depth_Calc=1:n()))
   }
   
-  if(logDepth){
-    metadat_aux <- metadat_aux %>% mutate(Depth = log(Depth))
-  }
-  
-  
-  data_tax_aux <- data_tax_aux %>%
+  data_tax_aux <- metadat_aux %>%
     left_join(metadat_aux %>% select(Samples,Latitude,Depth)) %>% 
     mutate(Depth_Calc = Depth, Latitude_Calc = Latitude)
   

@@ -198,3 +198,149 @@ animation::saveGIF({
   ani.height = 900,
   ani.width = 1800,interval = 4)
 
+
+####### ------------- Comparing
+
+p1 = df_outputSS %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(atleast=='AtLeastIn1') %>% filter(agglevel!='PG',agglevel!='SG1') %>% 
+  filter(Dimension=='GeoSpatial') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=method))+
+  geom_line(linewidth=1.5,alpha=0.9)+
+  facet_wrap(~agglevel,nrow=2)+
+  xlab('k')+ylab('log( Sum of Squares ) - Latitude & Depth')+
+  theme_minimal(base_size = 20)+
+  theme(legend.position = 'bottom')
+
+ggsave(filename = 'SS_raw.png',
+       plot = p1,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 18,height = 8)
+
+p2 = df_outputSS %>% 
+  mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+  filter(atleast=='AtLeastIn1') %>% filter(agglevel!='PG',agglevel!='SG1') %>% 
+  filter(Dimension=='GeoSpatial') %>% 
+ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=agglevel))+
+  geom_line(linewidth=1.5,alpha=0.9)+
+  xlab('k')+ylab('log( Sum of Squares ) - Latitude & Depth')+
+  facet_grid(~method)+
+  theme_minimal(base_size = 20)+
+  theme(legend.position = 'bottom')+
+  guides(color = guide_legend(title = "Tax. Granularity")) +
+  viridis::scale_color_viridis(discrete = T)
+
+
+ggsave(filename = 'SS_raw_2.png',
+       plot = p2,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 18,height = 9,dpi = 300)
+
+
+#### ------------ Getting the best plot 
+
+
+vec_aggregation
+sample_aggLevel <- vec_aggregation[8]
+desired_k <- c(18)
+list_plots <- list()
+list_plots_Ward <- list()
+list_plots_Medoid <- list()
+
+df_comp <- aggregating_compositions(
+  dFrame = dat_tax,
+  fillZeros = 'Nothing',
+  aggregating_level = vec_aggregation[1]
+) %>% select(Samples) %>%
+  left_join(metadat %>%
+              select(Samples,Latitude,Depth))
+
+for( i in 1:length(sample_aggLevel)){
+  
+  for(j in 1:length(desired_k)){
+    
+    ## preparing the dataframe 
+    df_comp$ClusterW2 <- factor(listW2[[1]][[sample_aggLevel[i]]][,desired_k[j]])
+    df_comp$ClusterMedoid <- factor(listMedois[[1]][[sample_aggLevel[i]]][,desired_k[j]])
+    
+    list_plots_Ward[[j]] <- ggLatDepth(df_comp,
+                                       clusterVar = 'ClusterW2',
+                                       baseSize = 24,
+                                       labelSize = 24,
+                                       title = paste('Ward','; k= ',desired_k[j]  ,' ; ', sample_aggLevel[i]))
+    
+    list_plots_Medoid[[j]] <- ggLatDepth(df_comp,
+                                         clusterVar = 'ClusterMedoid',
+                                         baseSize = 24,
+                                         labelSize = 24,
+                                         title = paste('PAM','; k= ',desired_k[j] ,' ; ', sample_aggLevel[i]))
+  }
+  
+  list_plots[[i]] <- list( Ward = list_plots_Ward,
+                           Medoid = list_plots_Medoid
+  )
+}
+
+names(list_plots) <- sample_aggLevel
+
+list_plots[[1]]
+
+
+###### -------- Summary 
+df_outputSS_ScaledABS_a0=readRDS('df_outputSS_ScaledABS_a0')
+df_outputSS_ScaledABS_a0.1=readRDS('df_outputSS_ScaledABS_a0.1')
+df_outputSS_ScaledABS_a0.25=readRDS('df_outputSS_ScaledABS_a0.25')
+
+SS_ABS_SCALED <- bind_rows(
+  df_outputSS_ScaledABS_a0,
+  df_outputSS_ScaledABS_a0.1,
+  df_outputSS_ScaledABS_a0.25,
+)  %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+              Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+              agglevel=factor(agglevel,levels=vec_aggregation),
+              AlphaGeo = factor(AlphaGeo)) %>%
+  filter(Dimension=='GeoSpatial',agglevel!='SG1',
+         atleast!='AtLeastIn3') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),
+             color=method,linetype=AlphaGeo))+
+  geom_line(linewidth=1.2,alpha=0.9)+
+  facet_grid(atleast~agglevel)+
+  xlab('k')+ylab('log(SS)')+
+  theme_minimal(base_size = 24)+
+  theme(legend.position = 'bottom')
+
+
+ggsave(filename = 'SS_scaled_abs.png',
+       plot = SS_ABS_SCALED,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 20,height = 10,dpi = 300)
+
+SS_ABS_SCALED_at1<- bind_rows(
+  df_outputSS_ScaledABS_a0,
+  df_outputSS_ScaledABS_a0.1,
+  df_outputSS_ScaledABS_a0.25,
+)  %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+              Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+              agglevel=factor(agglevel,levels=vec_aggregation),
+              AlphaGeo = factor(AlphaGeo)) %>%
+  filter(Dimension=='GeoSpatial',
+         atleast=='AtLeastIn1') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),
+             color=method,linetype=AlphaGeo))+
+  geom_line(linewidth=1.2,alpha=0.9)+
+  facet_wrap(~agglevel,nrow=2)+
+  xlab('k')+ylab('log(SS)')+
+  theme_minimal(base_size = 24)+
+  theme(legend.position = 'bottom')
+
+
+ggsave(filename = 'SS_scaled_abs_at1.png',
+       plot = SS_ABS_SCALED_at1,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 20,height = 10,dpi = 300)
+
+

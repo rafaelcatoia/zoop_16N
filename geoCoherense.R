@@ -1,5 +1,8 @@
 geoCoherense <- function(
-    data_taxonomy,ClustVar,DephtVar='Depth'
+    data_taxonomy,ClustVar,
+    DephtVar='Depth',
+    scalingLatDepth_Abiotics = T,
+    ABS_Latitude = T
 ){
   ## Functions that we will use
   sum_dist <- function(x){
@@ -23,6 +26,22 @@ geoCoherense <- function(
   
   data_taxonomy$DephtVar = data_taxonomy %>% 
     dplyr::select(one_of(DephtVar)) %>% pull()
+  
+  if(scalingLatDepth_Abiotics){
+    data_taxonomy %>% mutate(
+      Latitude = scale(Latitude),
+      DephtVar = scale(DephtVar),
+      Pressure_decibars = scale(Pressure_decibars),
+      Salinity_psu = scale(Salinity_psu),
+      Temperature_degrees_Celsius = scale(Temperature_degrees_Celsius)
+    )
+    
+  }
+  
+  if(ABS_Latitude){
+    data_taxonomy= data_taxonomy %>% mutate(Latitude=abs(Latitude))
+  }
+  
   
   ### Abiotic Coherense
   array_with_clusters <- 

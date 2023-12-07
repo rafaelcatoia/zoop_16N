@@ -33,9 +33,8 @@ vars <- vec_aggregation
 RemMoment <- c('Before','After')
 CHull = c("N","Y")
 DephtRank = c("Y","N")
-ABS_Latitude = c("Y","N")
-Standardize=c("Y","N")
-LogDepth=c("Y","N")
+ABS_Latitude = c("N","Y")
+Standardize=c("N","Y")
 selectInput('aggLevel', 'Aggregation Level',selected = 1,vars)
 numericInput('clustN', 'Cluster count', 10, min = 1, max = 40)
 numericInput('AtLeastN','ASVs in at least',1,min=1,max=5)
@@ -45,10 +44,9 @@ sliderInput(inputId = "alphaGeo",
                   label = "Geo weight",
                   min = 0,
                   max = 1,step = 0.05,value = 0.1)  
-selectInput('DephtRank','Depht as Rank N/Y',selected = 2,DephtRank)
-selectInput('Standardize',  'Depht in the log scale',selected = 2,LogDepth)
-selectInput('LogDepth',  'Normalizing Latitude and Depht',selected = 2,Standardize)
-selectInput('ABS_Latitude','Abs of the Latitude N/Y',selected = 2,ABS_Latitude)
+selectInput('DephtRank','Depht as Rank N/Y',selected = 1,DephtRank)
+selectInput('Standardize',  'Depht in the log scale',selected = 1,LogDepth)
+selectInput('ABS_Latitude','Abs of the Latitude N/Y',selected = 1,ABS_Latitude)
 ```
 :::
 
@@ -333,7 +331,6 @@ clusters_mixdist <- reactive({
                 depthRank = input$DephtRank,
                 ABS_Latitude=ifelse(input$ABS_Latitude =='Y',T,F),
                 scalingLatDepth = ifelse(input$Standardize =='Y',T,F),
-                logDepth = ifelse(input$LogDepth =='Y',T,F),
                 k_clust = input$clustN)
 })
 
@@ -691,6 +688,11 @@ Samples_Over_ASV<- data.frame(
   NumberOfASVs = apply(dat_tax %>% select(starts_with("P16")),2,function(x){sum(x!=0)}) 
 ) %>% arrange(-NumberOfASVs) %>% mutate(SampleNumber= 1:n())
 
+
+nrow(ASV_Over_Samples %>% filter(PresentInNSamples==1))/nrow(ASV_Over_Samples)
+nrow(ASV_Over_Samples %>% filter(PresentInNSamples==2))/nrow(ASV_Over_Samples)
+nrow(ASV_Over_Samples %>% filter(PresentInNSamples>=2))/nrow(ASV_Over_Samples)
+nrow(ASV_Over_Samples %>% filter(PresentInNSamples>=3))/nrow(ASV_Over_Samples)
 
 ASV_Over_Samples %>% 
   ggplot(aes(x=ASVNumber,y=PresentInNSamples))+
@@ -1307,13 +1309,280 @@ bind_rows(
 
 ::: 
 
-## Creating all clusters
+## New Sum of Squares 
 
-Here we are going 
+```{r}
+##### ------- Zero Alpha 
+
+## listW2_alpha0 <- clusterize_MixDistW2(
+##   data_taxonomy = dat_tax,
+##   vec_aggreg = vec_aggregation,
+##   data_metadat = metadat,
+##   scalingLatDepth = T,
+##   ABS_Latitude = T,
+##   propGeo = 0,
+##   max_k = 50,max_at_least = 3)
+## 
+## listMedois_alpha0 <- clusterize_MixDist_kmedoids(
+##   data_taxonomy = dat_tax,
+##   vec_aggreg = vec_aggregation,
+##   data_metadat = metadat,
+##   scalingLatDepth = T,
+##   ABS_Latitude = T,
+##   propGeo = 0,
+##   max_k = 50,max_at_least = 3)
+## 
+## dat_tax_aux <- aggregating_compositions(
+##  dFrame = dat_tax,
+##  fillZeros = 'Nothing',
+##  aggregating_level = vec_aggregation[1],
+##  PresentAtLeast = 1,
+##  metadata = metadat
+## ) %>% mutate(
+##  OBS=1:n()) %>% 
+##  select(OBS,Latitude,Depth,Pressure_decibars,
+##         Salinity_psu,Temperature_degrees_Celsius)
+## 
+## outputSS_ScaledABS <- list()
+## kmax = length(listW2_alpha0$AtLeast1$PG)
+## for (i in 1:3){
+##  
+##  outputAgg <- list()
+##  for(j in 1:length(vec_aggregation)){
+##    
+##    outputDistances <- list()
+##    for(k in 1:kmax){
+##      
+##      dat_tax_aux = 
+##        dat_tax_aux %>% mutate(
+##          Ward_Clust = factor(listW2_alpha0[[i]][[j]][[k]]),
+##          Medoid_Clust = factor(listMedois_alpha0[[i]][[j]][[k]]))
+##      
+##      outputDistances[[k]] <- list(
+##        Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'Depth'),
+##        Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'Depth'))
+##    }
+##    names(outputDistances) <- ifelse(1:kmax < 10,
+##                                     paste('Cluster0',1:kmax,sep=''),
+##                                     paste('Cluster',1:kmax,sep=''))
+##    outputAgg[[j]]<-outputDistances
+##    rm(outputDistances)
+##  }
+##  
+##  names(outputAgg) <- vec_aggregation
+##  outputSS_ScaledABS[[i]] <- outputAgg
+##  rm(outputAgg)
+## }
+## 
+## names(outputSS_ScaledABS) <- paste('AtLeastIn',1:3,sep='')
+## 
+## saveRDS(object = outputSS_ScaledABS,file = 'outputSS_ScaledABS')
+## outputSS_ScaledABS=readRDS('outputSS_ScaledABS')
+## 
+## df_outputSS_ScaledABS_a0 <- outputSS_ScaledABS %>% plyr::ldply(function(atleast){
+##  atleast %>% plyr::ldply(function(agglevel){
+##    agglevel %>% plyr::ldply(function(cluster){
+##      cluster %>% plyr::ldply(function(method){
+##        method %>% plyr::ldply(function(dimension){
+##          return(data.frame(TotalSum = sum(dimension$SumDist)))
+##        }, .id = "dimension")
+##      }, .id = "method")
+##    }, .id = "clusters")
+##  }, .id = "agglevel")
+## }, .id = "atleast") %>% mutate(AlphaGeo = 0)
+## 
+## saveRDS(object = df_outputSS_ScaledABS_a0,file = 'df_outputSS_ScaledABS_a0')
+df_outputSS_ScaledABS_a0=readRDS('df_outputSS_ScaledABS_a0')
+ 
+ 
+##  ######## ----------
+##  ##### ------- alphaGeo = 0.1
+##  
+##  listW2_alpha0.1 <- clusterize_MixDistW2(
+##    data_taxonomy = dat_tax,
+##    vec_aggreg = vec_aggregation,
+##    data_metadat = metadat,
+##    scalingLatDepth = T,
+##    ABS_Latitude = T,
+##    propGeo = 0.1,
+##    max_k = 50,max_at_least = 3)
+##  
+##  listMedois_alpha0.1 <- clusterize_MixDist_kmedoids(
+##    data_taxonomy = dat_tax,
+##    vec_aggreg = vec_aggregation,
+##    data_metadat = metadat,
+##    scalingLatDepth = T,
+##    ABS_Latitude = T,
+##    propGeo = 0.1,
+##    max_k = 50,max_at_least = 3)
+##  
+##  dat_tax_aux <- aggregating_compositions(
+##   dFrame = dat_tax,
+##   fillZeros = 'Nothing',
+##   aggregating_level = vec_aggregation[1],
+##   PresentAtLeast = 1,
+##   metadata = metadat
+##  ) %>% mutate(
+##   OBS=1:n()) %>% 
+##   select(OBS,Latitude,Depth,Pressure_decibars,
+##          Salinity_psu,Temperature_degrees_Celsius)
+##  
+##  outputSS_ScaledABS_a0.1 <- list()
+##  kmax = length(listMedois_alpha0.1$AtLeast1$PG)
+##  for (i in 1:3){
+##   
+##   outputAgg <- list()
+##   for(j in 1:length(vec_aggregation)){
+##     
+##     outputDistances <- list()
+##     for(k in 1:kmax){
+##       
+##       dat_tax_aux = 
+##         dat_tax_aux %>% mutate(
+##           Ward_Clust = factor(listW2_alpha0.1[[i]][[j]][[k]]),
+##           Medoid_Clust = factor(listMedois_alpha0.1[[i]][[j]][[k]]))
+##       
+##       outputDistances[[k]] <- list(
+##         Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'Depth'),
+##         Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'Depth'))
+##     }
+##     names(outputDistances) <- ifelse(1:kmax < 10,
+##                                      paste('Cluster0',1:kmax,sep=''),
+##                                      paste('Cluster',1:kmax,sep=''))
+##     outputAgg[[j]]<-outputDistances
+##     rm(outputDistances)
+##   }
+##   
+##   names(outputAgg) <- vec_aggregation
+##   outputSS_ScaledABS_a0.1[[i]] <- outputAgg
+##   rm(outputAgg)
+##  }
+##  
+##  names(outputSS_ScaledABS_a0.1) <- paste('AtLeastIn',1:3,sep='')
+##  
+##  saveRDS(object = outputSS_ScaledABS_a0.1,file = 'outputSS_ScaledABS_a0.1')
+##  outputSS_ScaledABS_a0.1=readRDS('outputSS_ScaledABS_a0.1')
+##  
+##  df_outputSS_ScaledABS_a0.1 <- outputSS_ScaledABS_a0.1 %>% plyr::ldply(function(atleast){
+##   atleast %>% plyr::ldply(function(agglevel){
+##     agglevel %>% plyr::ldply(function(cluster){
+##       cluster %>% plyr::ldply(function(method){
+##         method %>% plyr::ldply(function(dimension){
+##           return(data.frame(TotalSum = sum(dimension$SumDist)))
+##         }, .id = "dimension")
+##       }, .id = "method")
+##     }, .id = "clusters")
+##   }, .id = "agglevel")
+##  }, .id = "atleast") %>% mutate(AlphaGeo = 0.1)
+##  
+##  saveRDS(object = df_outputSS_ScaledABS_a0.1,file = 'df_outputSS_ScaledABS_a0.1')
+df_outputSS_ScaledABS_a0.1=readRDS('df_outputSS_ScaledABS_a0.1')
+ 
+ ##### ------- alphaGeo = 0.25
+ 
+## listW2_alpha0.25 <- clusterize_MixDistW2(
+##   data_taxonomy = dat_tax,
+##   vec_aggreg = vec_aggregation,
+##   data_metadat = metadat,
+##   scalingLatDepth = T,
+##   ABS_Latitude = T,
+##   propGeo = 0.25,
+##   max_k = 50,max_at_least = 3)
+## 
+## listMedois_alpha0.25 <- clusterize_MixDist_kmedoids(
+##   data_taxonomy = dat_tax,
+##   vec_aggreg = vec_aggregation,
+##   data_metadat = metadat,
+##   scalingLatDepth = T,
+##   ABS_Latitude = T,
+##   propGeo = 0.25,
+##   max_k = 50,max_at_least = 3)
+## 
+## dat_tax_aux <- aggregating_compositions(
+##  dFrame = dat_tax,
+##  fillZeros = 'Nothing',
+##  aggregating_level = vec_aggregation[1],
+##  PresentAtLeast = 1,
+##  metadata = metadat
+## ) %>% mutate(
+##  OBS=1:n()) %>% 
+##  select(OBS,Latitude,Depth,Pressure_decibars,
+##         Salinity_psu,Temperature_degrees_Celsius)
+## 
+## outputSS_ScaledABS_a0.25 <- list()
+## kmax = length(listMedois_alpha0.25$AtLeast1$PG)
+## for (i in 1:3){
+##  
+##  outputAgg <- list()
+##  for(j in 1:length(vec_aggregation)){
+##    
+##    outputDistances <- list()
+##    for(k in 1:kmax){
+##      
+##      dat_tax_aux = 
+##        dat_tax_aux %>% mutate(
+##          Ward_Clust = factor(listW2_alpha0.25[[i]][[j]][[k]]),
+##          Medoid_Clust = factor(listMedois_alpha0.25[[i]][[j]][[k]]))
+##      
+##      outputDistances[[k]] <- list(
+##        Ward=dat_tax_aux %>% geoCoherense(ClustVar = 'Ward_Clust',DephtVar = 'Depth'),
+##        Medoid=dat_tax_aux %>% geoCoherense(ClustVar = 'Medoid_Clust',DephtVar = 'Depth'))
+##    }
+##    names(outputDistances) <- ifelse(1:kmax < 10,
+##                                     paste('Cluster0',1:kmax,sep=''),
+##                                     paste('Cluster',1:kmax,sep=''))
+##    outputAgg[[j]]<-outputDistances
+##    rm(outputDistances)
+##  }
+##  
+##  names(outputAgg) <- vec_aggregation
+##  outputSS_ScaledABS_a0.25[[i]] <- outputAgg
+##  rm(outputAgg)
+## }
+## 
+## names(outputSS_ScaledABS_a0.25) <- paste('AtLeastIn',1:3,sep='')
+## 
+## saveRDS(object = outputSS_ScaledABS_a0.25,file = 'outputSS_ScaledABS_a0.25')
+## outputSS_ScaledABS_a0.25=readRDS('outputSS_ScaledABS_a0.25')
+## 
+## df_outputSS_ScaledABS_a0.25 <- outputSS_ScaledABS_a0.25 %>% plyr::ldply(function(atleast){
+##  atleast %>% plyr::ldply(function(agglevel){
+##    agglevel %>% plyr::ldply(function(cluster){
+##      cluster %>% plyr::ldply(function(method){
+##        method %>% plyr::ldply(function(dimension){
+##          return(data.frame(TotalSum = sum(dimension$SumDist)))
+##        }, .id = "dimension")
+##      }, .id = "method")
+##    }, .id = "clusters")
+##  }, .id = "agglevel")
+## }, .id = "atleast") %>% mutate(AlphaGeo = 0.25)
+## 
+## saveRDS(object = df_outputSS_ScaledABS_a0.25,file = 'df_outputSS_ScaledABS_a0.25')
+df_outputSS_ScaledABS_a0.25=readRDS('df_outputSS_ScaledABS_a0.25')
+```
 
 
+```{r,fig.height=14}
+#| code-fold: true
 
+bind_rows(
+  df_outputSS_ScaledABS_a0,
+  df_outputSS_ScaledABS_a0.1,
+  df_outputSS_ScaledABS_a0.25,
+)  %>% mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
+         Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
+         agglevel=factor(agglevel,levels=vec_aggregation),
+         AlphaGeo = factor(AlphaGeo)) %>%
+  filter(Dimension=='GeoSpatial',agglevel!='SG1',
+         atleast!='AtLeastIn3') %>% 
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),
+             color=method,linetype=AlphaGeo))+
+  geom_line(linewidth=0.75,alpha=0.75)+
+  facet_grid(atleast~agglevel)+
+  theme_minimal()+
+  theme(legend.position = 'bottom')
 
+```
 
 
 ::: 
