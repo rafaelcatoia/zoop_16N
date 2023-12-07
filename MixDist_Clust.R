@@ -7,7 +7,7 @@
 
 MixDist_Clust <- function(
     metadat_aux,data_tax_aux,
-    alphaGeo,
+    alphaGeo=0,
     depthRank='Y',
     ABS_Latitude=F,
     logDepth=F,
@@ -38,7 +38,7 @@ MixDist_Clust <- function(
   
   if(scalingLatDepth){
     data_tax_aux = data_tax_aux %>% 
-      mutate(Depth_Calc=scale(Latitude_Calc),
+      mutate(Depth_Calc=scale(Depth_Calc),
              Latitude_Calc=scale(Latitude_Calc))
   }
   
