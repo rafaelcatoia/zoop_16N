@@ -711,7 +711,6 @@ Samples_Over_ASV %>%
 ```{r}
 #| code-fold: true
 
-
 # ## Creating all Clusters
 # listW2 <- clusterize_MixDist_hclustW2(
 #   data_taxonomy = dat_tax,
@@ -798,8 +797,8 @@ Samples_Over_ASV %>%
 # }, .id = "atleast")
 #  
 # data.table::fwrite(df_outputSS_MixDist,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist.csv')
-df_outputSS_MixDist <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist.csv')
-df_outputSS_MixDist_0.2 = df_outputSS_MixDist %>% mutate(AlphaGeo=0.2)
+#df_outputSS_MixDist <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist.csv')
+#df_outputSS_MixDist_0.2 = df_outputSS_MixDist %>% mutate(AlphaGeo=0.2)
 ```
 
 
@@ -897,7 +896,7 @@ df_outputSS_MixDist_0.2 = df_outputSS_MixDist %>% mutate(AlphaGeo=0.2)
 # df_outputSS_MixDist_0.1 = df_outputSS_MixDist %>% mutate(AlphaGeo = 0.1)
 #  
 # data.table::fwrite(df_outputSS_MixDist_0.1,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist_0.1.csv')
-df_outputSS_MixDist_0.1 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.1.csv')
+#df_outputSS_MixDist_0.1 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.1.csv')
 ```
 
 ```{r}
@@ -994,7 +993,7 @@ df_outputSS_MixDist_0.1 <- data.table::fread('https://raw.githubusercontent.com/
 # df_outputSS_MixDist_0.35 = df_outputSS_MixDist %>% mutate(AlphaGeo = 0.35)
 #  
 # data.table::fwrite(df_outputSS_MixDist_0.35,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_MixDist_0.35.csv')
-df_outputSS_MixDist_0.35 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.35.csv')
+#df_outputSS_MixDist_0.35 <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_MixDist_0.35.csv')
 ```
 
 

@@ -343,4 +343,226 @@ ggsave(filename = 'SS_scaled_abs_at1.png',
        path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
        width = 20,height = 10,dpi = 300)
 
+########## ----------------------- Creating the best
+selectedData <-
+  aggregating_compositions(
+    dFrame = dat_tax,
+    fillZeros = 'Add',
+    RemoveMoment = 'Before',
+    aggregating_level = vec_aggregation[9],
+    PresentAtLeast = 2
+  ) 
+
+
+clusters_mixdist <- 
+  MixDist_Clust(metadat_aux = metadat,
+                data_tax_aux = selectedData,
+                alphaGeo = 0.1,
+                depthRank = 'N',
+                ABS_Latitude=T,
+                scalingLatDepth =T,
+                k_clust = 15)
+
+clusters_mixdist
+########## ------------------------ GGLat Depth
+df_comp <- aggregating_compositions(
+  dFrame = dat_tax,
+  fillZeros = 'Nothing',
+  aggregating_level = vec_aggregation[1]
+) %>% select(Samples) %>%
+  left_join(metadat %>%
+              select(Samples,Latitude,Depth,Pressure_decibars,
+                     Salinity_psu,Temperature_degrees_Celsius)) %>% 
+  mutate(ClustWardMix = factor(clusters_mixdist$WardClust))
+
+gglatselected <- ggLatDepth(df_comp,
+           clusterVar = 'ClustWardMix',
+           baseSize = 24,
+           labelSize = 24)
+
+ggsave(filename = 'gglatselected.png',
+       plot = gglatselected,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 20,height = 10,dpi = 300)
+
+###### --- Changing the label size
+ggLatDepth_temp<-function(
+    dataset,
+    clusterVar,
+    title ='',
+    IncludeMedoid=F,
+    labelSize=20,
+    CHull=F){
+  output <- list()
+  dataset$Cluster = dataset %>% dplyr::select(one_of(clusterVar)) %>% pull()
+  
+  output$temp <- 
+    ggplot(dataset,
+           aes(x=Latitude,y=Depth,color=Temperature_degrees_Celsius,label=Cluster))+
+    geom_vline(xintercept = c(-60,-45,-5,5,35),col='gray75')+
+    #geom_hline(yintercept =0,col='gray75')+
+    geom_label(alpha=0.5,size = labelSize/.pt)+
+    scale_y_reverse() +
+    theme_minimal()+ 
+    annotate("text", x = -67, y = -25, label = "Southern Ocean",hjust=0.5)+
+    annotate("text", x = -52, y = -25, label = "Subantarctic",hjust=0.5)+
+    annotate("text", x = -25, y = -25, label = "South Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 0, y = -25, label = "Equatorial",hjust=0.5)+
+    annotate("text", x = 20, y = -25, label = "North Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 45, y = -25, label = "Subarctic",hjust=0.5)+
+    ggtitle(title)+
+    theme(legend.position = 'bottom',
+          panel.grid.major = element_blank())+
+    scale_color_viridis()
+  
+  output$Salinity <- ggplot(dataset,
+                            aes(x=Latitude,y=Depth,color=Salinity_psu,label=Cluster))+
+    geom_vline(xintercept = c(-60,-45,-5,5,35),col='gray75')+
+    #geom_hline(yintercept =0,col='gray75')+
+    geom_label(alpha=0.5,size = labelSize/.pt)+
+    scale_y_reverse() +
+    theme_minimal()+ 
+    annotate("text", x = -67, y = -25, label = "Southern Ocean",hjust=0.5)+
+    annotate("text", x = -52, y = -25, label = "Subantarctic",hjust=0.5)+
+    annotate("text", x = -25, y = -25, label = "South Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 0, y = -25, label = "Equatorial",hjust=0.5)+
+    annotate("text", x = 20, y = -25, label = "North Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 45, y = -25, label = "Subarctic",hjust=0.5)+
+    ggtitle(title)+
+    theme(legend.position = 'bottom',
+          panel.grid.major = element_blank())+
+    scale_color_viridis()
+  
+  output$Pressure <- ggplot(dataset,
+                            aes(x=Latitude,y=Depth,color=Pressure_decibars,label=Cluster))+
+    geom_vline(xintercept = c(-60,-45,-5,5,35),col='gray75')+
+    #geom_hline(yintercept =0,col='gray75')+
+    geom_label(alpha=0.7,size = labelSize/.pt)+
+    scale_y_reverse() +
+    theme_minimal()+ 
+    annotate("text", x = -67, y = -25, label = "Southern Ocean",hjust=0.5)+
+    annotate("text", x = -52, y = -25, label = "Subantarctic",hjust=0.5)+
+    annotate("text", x = -25, y = -25, label = "South Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 0, y = -25, label = "Equatorial",hjust=0.5)+
+    annotate("text", x = 20, y = -25, label = "North Pacific Gyre",hjust=0.5)+
+    annotate("text", x = 45, y = -25, label = "Subarctic",hjust=0.5)+
+    ggtitle(title)+
+    theme(legend.position = 'bottom',
+          panel.grid.major = element_blank())+
+    scale_color_viridis()
+  
+  
+  p1 = ggplot(dataset,
+              aes(x=Temperature_degrees_Celsius,y=Pressure_decibars,
+                  color=Cluster,label=Cluster))+
+    geom_label(alpha=0.5,size = labelSize/.pt)+
+    theme_minimal()+ 
+    ggtitle(title)+
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank())
+  
+  p2 = ggplot(dataset,
+              aes(x=Temperature_degrees_Celsius,y=Salinity_psu,
+                  color=Cluster,label=Cluster))+
+    geom_label(alpha=0.5,size = labelSize/.pt)+
+    theme_minimal()+ 
+    ggtitle(title)+
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank())
+  
+  p3 = ggplot(dataset,
+              aes(x=Salinity_psu,y=Pressure_decibars,
+                  color=Cluster,label=Cluster))+
+    geom_label(alpha=0.5,size = labelSize/.pt)+
+    theme_minimal()+ 
+    ggtitle(title)+
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank())
+  
+  if(CHull){
+    
+    chull_p1 <- dataset %>% 
+      group_by(Cluster) %>%
+      slice(chull(Temperature_degrees_Celsius,y=Pressure_decibars))
+    p1 =  p1 +
+      geom_polygon(data = chull_p1, alpha = 0.2,aes(fill=Cluster))
+    
+    chull_p2 <- dataset %>% 
+      group_by(Cluster) %>%
+      slice(chull(Temperature_degrees_Celsius,y=Salinity_psu))
+    p2 =  p2 +
+      geom_polygon(data = chull_p2, alpha = 0.2,aes(fill=Cluster))
+    
+    chull_p3 <- dataset %>% 
+      group_by(Cluster) %>%
+      slice(chull(Salinity_psu,y=Pressure_decibars))
+    p3 =  p3 +
+      geom_polygon(data = chull_p3, alpha = 0.2,aes(fill=Cluster))
+  }
+  
+  if(IncludeMedoid){
+    
+    p1 = p1 + geom_label(data = dataset %>% filter(Medoid==1),
+                         mapping =aes(x=Temperature_degrees_Celsius,y=Pressure_decibars,color=Cluster,label=Cluster),
+                         label.size = 1.5,alpha=0.6)
+    
+    p2 = p2 + geom_label(data = dataset %>% filter(Medoid==1),
+                         mapping =aes(x=Temperature_degrees_Celsius,y=Salinity_psu,color=Cluster,label=Cluster),
+                         label.size = 1.5,alpha=0.6)
+    
+    p3 = p3 + geom_label(data = dataset %>% filter(Medoid==1),
+                         mapping =aes(x=Salinity_psu,y=Pressure_decibars,color=Cluster,label=Cluster),
+                         label.size = 1.5,alpha=0.6)
+  }
+  
+  p1 = p1 + scale_y_reverse()
+  p3 = p3 + scale_y_reverse()
+  
+  output$Temp_Press <- p1
+  output$Temp_Salinity <- p2
+  output$Salinity_Press <- p3
+  output$Scatter = arrangeGrob(p1,p2,p3,ncol=3)
+  
+  return(output)
+}
+########## ------------------------ GGLat Depth Temp
+gglatselected_abiotic <- ggLatDepth_temp(df_comp,
+                                         clusterVar = 'ClustWardMix')
+
+
+
+p1_ = gglatselected_abiotic$Temp_Press+
+  xlab('Temperature (Celcius)')+ylab('Pressure (decibars)')+
+  theme_minimal(base_size = 24) +
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank())
+
+p2_ = gglatselected_abiotic$Temp_Salinity+
+  xlab('Temperature (Celcius)')+ylab('Salinity (psu)')+
+  theme_minimal(base_size = 24)+  
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank())
+
+p3_ = gglatselected_abiotic$Salinity_Press+
+  xlab('Pressure (decibars)')+xlab('Salinity (psu)')+
+  theme_minimal(base_size = 24)+  
+  theme(legend.position = 'none',
+        panel.grid.major = element_blank())
+
+ggsave(filename = 'p1_abio.png',
+       plot = p1_,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 10,height = 10,dpi = 300)
+
+ggsave(filename = 'p2_abio.png',
+       plot = p2_,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 10,height = 10,dpi = 300)
+
+ggsave(filename = 'p3_abio.png',
+       plot = p3_,device = 'png',
+       path = '/Users/rafaelcatoia/Desktop/repos/Capstone/',
+       width = 10,height = 10,dpi = 300)
+########## ------------------------ MDS
+
 
