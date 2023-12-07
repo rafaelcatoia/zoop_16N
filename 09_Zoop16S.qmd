@@ -1392,9 +1392,6 @@ bind_rows(
 ## }, .id = "atleast") %>% mutate(AlphaGeo = 0)
 ## 
 ## saveRDS(object = df_outputSS_ScaledABS_a0,file = 'df_outputSS_ScaledABS_a0')
-df_outputSS_ScaledABS_a0=readRDS('df_outputSS_ScaledABS_a0')
- 
- 
 ##  ######## ----------
 ##  ##### ------- alphaGeo = 0.1
 ##  
@@ -1476,8 +1473,6 @@ df_outputSS_ScaledABS_a0=readRDS('df_outputSS_ScaledABS_a0')
 ##  }, .id = "atleast") %>% mutate(AlphaGeo = 0.1)
 ##  
 ##  saveRDS(object = df_outputSS_ScaledABS_a0.1,file = 'df_outputSS_ScaledABS_a0.1')
-df_outputSS_ScaledABS_a0.1=readRDS('df_outputSS_ScaledABS_a0.1')
- 
  ##### ------- alphaGeo = 0.25
  
 ## listW2_alpha0.25 <- clusterize_MixDistW2(
@@ -1558,12 +1553,17 @@ df_outputSS_ScaledABS_a0.1=readRDS('df_outputSS_ScaledABS_a0.1')
 ## }, .id = "atleast") %>% mutate(AlphaGeo = 0.25)
 ## 
 ## saveRDS(object = df_outputSS_ScaledABS_a0.25,file = 'df_outputSS_ScaledABS_a0.25')
-df_outputSS_ScaledABS_a0.25=readRDS('df_outputSS_ScaledABS_a0.25')
 ```
 
 
-```{r,fig.height=14}
+```{r,fig.height=8}
 #| code-fold: true
+
+df_outputSS_ScaledABS_a0=data.table::fread('/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_ScaledABS_a0.csv')
+
+df_outputSS_ScaledABS_a0.1=data.table::fread('/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_ScaledABS_a0.1.csv')
+
+df_outputSS_ScaledABS_a0.25=data.table::fread('/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_ScaledABS_a0.25.csv')
 
 bind_rows(
   df_outputSS_ScaledABS_a0,

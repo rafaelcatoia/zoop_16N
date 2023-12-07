@@ -21,7 +21,7 @@ MixDist_Clust <- function(
                   arrange(Depth) %>% mutate(Depth_Calc=1:n()))
   }
   
-  data_tax_aux <- metadat_aux %>%
+  data_tax_aux <- data_tax_aux %>%
     left_join(metadat_aux %>% select(Samples,Latitude,Depth)) %>% 
     mutate(Depth_Calc = Depth, Latitude_Calc = Latitude)
   
