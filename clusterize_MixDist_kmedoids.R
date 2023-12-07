@@ -13,6 +13,7 @@ clusterize_MixDist_kmedoids <- function(
     vec_aggreg,
     max_k=30,
     max_at_least=1,
+    ABS_Latitude=F,
     moment='Before',DepthRank=T,propGeo=0.2){
   
   
@@ -46,13 +47,21 @@ clusterize_MixDist_kmedoids <- function(
         
         df_comp <- df_comp %>% left_join(data_metadat %>% select(Samples,Latitude,Depth))
         
-        GeoDist <- df_comp %>% select(Latitude,Depth) %>% dist()
+        if(ABS_Latitude){
+          GeoDist <- df_comp %>% select(Latitude,Depth) %>% mutate(Latitude=abs(Latitude))%>% dist()  
+        }else{
+          GeoDist <- df_comp %>% select(Latitude,Depth) %>% dist()  
+        }
         
         ## Mixing the distances
         GeoDist = GeoDist/max(GeoDist)
         AitchisonDist <- clrObj$dist_Aitchison/max(clrObj$dist_Aitchison)
         
         FinalDist = propGeo*GeoDist+ (1-propGeo)*AitchisonDist
+        
+        dframe_clusters <- as.data.frame(
+          matrix(NA,nrow = nrow(clrObj$CLR$x.clr),ncol=max_k)
+        )
         
         for(k in 1:max_k){
           dframe_clusters[,k] <- cluster::pam(x=FinalDist, k = k,

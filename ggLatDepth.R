@@ -6,7 +6,9 @@ ggLatDepth <- function(
     CHull=F,
     OceanLayers=F,
     FacetClusters=F,
-    LatitudeRegions=T){
+    LatitudeRegions=T,
+    labelSize=12,
+    baseSize=16){
   
   dataset$Cluster = dataset %>% dplyr::select(one_of(clusterVar)) %>% pull()
   
@@ -19,9 +21,10 @@ ggLatDepth <- function(
            aes(x=Latitude,y=Depth,color=Cluster,label=Cluster))+
     geom_vline(xintercept = c(-60,-45,-5,5,35),col='gray75')+
     #geom_hline(yintercept =0,col='gray75')+
-    geom_label(alpha=0.3)+
+    geom_label(alpha=0.3,size = labelSize/.pt)+
     scale_y_reverse() +
-    theme_minimal()+ 
+    geom_hline(yintercept = c(0),col='gray55')+
+    theme_minimal(base_size = baseSize)+ 
     ggtitle(title)+
     theme(legend.position = 'none',
           panel.grid.major = element_blank())
@@ -29,15 +32,15 @@ ggLatDepth <- function(
   
   if(LatitudeRegions){
     output = output+
-      annotate("text", x = -67, y = -25, label = "Southern Ocean",hjust=0.5)+
-      annotate("text", x = -52, y = -25, label = "Subantarctic",hjust=0.5)+
-      annotate("text", x = -25, y = -25, label = "South Pacific Gyre",hjust=0.5)+
-      annotate("text", x = 0, y = -25, label = "Equatorial",hjust=0.5)+
-      annotate("text", x = 20, y = -25, label = "North Pacific Gyre",hjust=0.5)+
-      annotate("text", x = 45, y = -25, label = "Subarctic",hjust=0.5)
+      annotate("text",size = labelSize*0.25, x = -67, y = -50, label = "Southern Ocean",hjust=0.5)+
+      annotate("text",size = labelSize*0.25, x = -52, y = -50, label = "Subantarctic",hjust=0.5)+
+      annotate("text",size = labelSize*0.25, x = -25, y = -50, label = "South Pacific Gyre",hjust=0.5)+
+      annotate("text",size = labelSize*0.25, x = 0,   y = -50, label = "Equatorial",hjust=0.5)+
+      annotate("text",size = labelSize*0.25, x = 20,  y = -50, label = "North Pacific Gyre",hjust=0.5)+
+      annotate("text",size = labelSize*0.25, x = 45,  y = -50, label = "Subarctic",hjust=0.5)
   }
   
-  
+
   if(CHull){
     chull_ <- dataset %>% 
       group_by(Cluster) %>%

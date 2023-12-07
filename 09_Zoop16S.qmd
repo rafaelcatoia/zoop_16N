@@ -60,6 +60,16 @@ selectInput('ABS_Latitude','Abs of the Latitude N/Y',selected = 1,ABS_Latitude)
 plotOutput('LatDepth_Ward',height = '600px')
 ```
 
+```{r}
+#| panel: center
+plotOutput('MDS_2D_Ward',height = '600px')
+```
+
+```{r}
+#| panel: center
+plotly::plotlyOutput('MDS_3D_Ward')
+```
+
 ### Abiotics 
 
 ::: {.panel-tabset}
@@ -67,40 +77,28 @@ plotOutput('LatDepth_Ward',height = '600px')
 #### All
 ```{r}
 #| panel: center
-plotOutput('Abiotics_Ward_Scatter')
+plotOutput('Abiotics_Ward_Scatter',height = '600px')
 ```
 
 #### Temp 
 ```{r}
 #| panel: center
-plotOutput('Abiotics_Ward_temp')
+plotOutput('Abiotics_Ward_temp',height = '600px')
 ```
 
 #### Salinity
 ```{r}
 #| panel: center
-plotOutput('Abiotics_Ward_Salinity')
+plotOutput('Abiotics_Ward_Salinity',height = '600px')
 ```
 
 #### Pressure
 ```{r}
 #| panel: center
-plotOutput('Abiotics_Ward_Pressure')
+plotOutput('Abiotics_Ward_Pressure',height = '600px')
 ```
 
 ::: 
-
-### MDS 
-
-```{r}
-#| panel: center
-plotOutput('MDS_2D_Ward')
-```
-
-```{r}
-#| panel: center
-plotly::plotlyOutput('MDS_3D_Ward')
-```
 
 ## Medoid
 
@@ -109,41 +107,9 @@ plotly::plotlyOutput('MDS_3D_Ward')
 plotOutput('LatDepth_Medoids',height = '600px')
 ```
 
-### Abiotics 
-
-::: {.panel-tabset}
-
-#### All
 ```{r}
 #| panel: center
-plotOutput('Abiotics_Medoid_Scatter')
-```
-
-#### Temp 
-```{r}
-#| panel: center
-plotOutput('Abiotics_Medoid_temp')
-```
-
-#### Salinity
-```{r}
-#| panel: center
-plotOutput('Abiotics_Medoid_Salinity')
-```
-
-#### Pressure
-```{r}
-#| panel: center
-plotOutput('Abiotics_Medoid_Pressure')
-```
-
-::: 
-
-### MDS 
-
-```{r}
-#| panel: center
-plotOutput('MDS_2D_Medoid')
+plotOutput('MDS_2D_Medoid',height = '600px')
 ```
 
 ```{r}
@@ -152,11 +118,37 @@ plotly::plotlyOutput('MDS_3D_Medoid',width = 'auto',height = 'auto')
 ```
 
 
-## DistMix - Ward
+### Abiotics 
 
 ::: {.panel-tabset}
 
-### Ward 
+#### All
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Scatter',height = '600px')
+```
+
+#### Temp 
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_temp',height = '600px')
+```
+
+#### Salinity
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Salinity',height = '600px')
+```
+
+#### Pressure
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Pressure',height = '600px')
+```
+
+::: 
+
+## Ward Mix
 
 ```{r}
 #| panel: center
@@ -165,10 +157,47 @@ plotOutput('LatDepth_Ward_Mix',height = '600px')
 
 ```{r}
 #| panel: center
-plotOutput('MDS_2D_Ward_Mix')
+plotOutput('MDS_2D_Ward_Mix',height = '600px')
 ```
 
-### Medoid 
+```{r}
+#| panel: center
+plotly::plotlyOutput('MDS_3D_Ward_Mix',width = 'auto',height = 'auto')
+```
+
+
+### Abiotics 
+
+::: {.panel-tabset}
+
+#### All
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Scatter_Mix',height = '600px')
+```
+
+#### Temp 
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_temp_Mix',height = '600px')
+```
+
+#### Salinity
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Salinity_Mix',height = '600px')
+```
+
+#### Pressure
+```{r}
+#| panel: center
+plotOutput('Abiotics_Ward_Pressure_Mix',height = '600px')
+```
+
+::: 
+
+
+## Medoid Mix
 
 ```{r}
 #| panel: center
@@ -177,10 +206,45 @@ plotOutput('LatDepth_Medoid_Mix',height = '600px')
 
 ```{r}
 #| panel: center
-plotOutput('MDS_2D_Medoid_Mix')
+plotOutput('MDS_2D_Medoid_Mix',height = '600px')
 ```
 
-:::
+```{r}
+#| panel: center
+plotly::plotlyOutput('MDS_3D_Medoid_Mix',width = 'auto',height = 'auto')
+```
+
+
+### Abiotics 
+
+::: {.panel-tabset}
+
+#### All
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Scatter_Mix',height = '600px')
+```
+
+#### Temp 
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_temp_Mix',height = '600px')
+```
+
+#### Salinity
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Salinity_Mix',height = '600px')
+```
+
+#### Pressure
+```{r}
+#| panel: center
+plotOutput('Abiotics_Medoid_Pressure_Mix',height = '600px')
+```
+
+::: 
+
 :::
 
 
@@ -201,12 +265,80 @@ library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ALR_CLR_distMatrices.R")
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/aggregating_composition_new.R")
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
-source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_temp.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds3d.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/functions.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/MixDist_Clust.R')
+
+ggLatDepth<- function(
+    dataset,
+    clusterVar,
+    title ='',
+    MedoidName='',
+    CHull=F,
+    OceanLayers=F,
+    FacetClusters=F,
+    LatitudeRegions=T,baseSize = 16){
+  
+  dataset$Cluster = dataset %>% dplyr::select(one_of(clusterVar)) %>% pull()
+  
+  if(MedoidName!=''){
+    dataset$Medoid =  dataset %>% dplyr::select(one_of(MedoidName)) %>% pull()
+  }
+  
+  output <- 
+    ggplot(dataset,
+           aes(x=Latitude,y=Depth,color=Cluster,label=Cluster))+
+    geom_vline(xintercept = c(-60,-45,-5,5,35),col='gray75')+
+    #geom_hline(yintercept =0,col='gray75')+
+    geom_label(alpha=0.3)+
+    scale_y_reverse() +
+    theme_minimal(base_size = baseSize)+ 
+    ggtitle(title)+
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank())
+  
+  
+  if(LatitudeRegions){
+    output = output+
+      annotate("text", x = -67, y = -25, label = "Southern Ocean",hjust=0.5)+
+      annotate("text", x = -52, y = -25, label = "Subantarctic",hjust=0.5)+
+      annotate("text", x = -25, y = -25, label = "South Pacific Gyre",hjust=0.5)+
+      annotate("text", x = 0, y = -25, label = "Equatorial",hjust=0.5)+
+      annotate("text", x = 20, y = -25, label = "North Pacific Gyre",hjust=0.5)+
+      annotate("text", x = 45, y = -25, label = "Subarctic",hjust=0.5)
+  }
+  
+  
+  if(CHull){
+    chull_ <- dataset %>% 
+      group_by(Cluster) %>%
+      slice(chull(Latitude, Depth))
+    output =  output +
+      geom_polygon(data = chull_, alpha = 0.2,aes(fill=Cluster))
+  }
+  
+  
+  if(MedoidName!=''){
+    output <- output +
+      geom_label(data = dataset %>% filter(Medoid==1),
+                 mapping =aes(x=Latitude,y=Depth,color=Cluster,label=Cluster),
+                 label.size = 1.5,alpha=0.6)
+  }
+  
+  if(OceanLayers){
+    output = output +
+    geom_hline(yintercept = c(0,200,1000),col='gray75')
+  }
+  
+  if(FacetClusters){
+    output = output +
+      facet_wrap(~Cluster,ncol=3)
+  }
+  
+  return(output)
+}
 
 #### Loading data
 metadat = data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/metadat_abiotic.csv') %>% as_tibble()
@@ -313,22 +445,22 @@ abiotics_medoids <- reactive(
     title = '')
 )
 
-######## 
-# abioticsMix_medoids <- reactive(
-#   ggLatDepth_temp(
-#     dataset = df_plot(),
-#     clusterVar = 'MixMedoid_Clust',
-#     CHull = ifelse(input$CHull=='Y',T,F),
-#     title = '')
-# )
-# 
-# abioticsMix_ward <- reactive(
-#   ggLatDepth_temp(
-#     dataset = df_plot(),
-#     clusterVar = 'MixWard_Clust',
-#     CHull = ifelse(input$CHull=='Y',T,F),
-#     title = '')
-# )
+######  MIX
+abioticsMix_medoids <- reactive(
+  ggLatDepth_temp(
+    dataset = df_plot(),
+    clusterVar = 'MixMedoid_Clust',
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+)
+
+abioticsMix_ward <- reactive(
+  ggLatDepth_temp(
+    dataset = df_plot(),
+    clusterVar = 'MixWard_Clust',
+    CHull = ifelse(input$CHull=='Y',T,F),
+    title = '')
+)
 
 
 #### Lat Depth ------------------------
@@ -391,19 +523,55 @@ output$Abiotics_Ward_Pressure <- renderPlot({
 
 ##### Medoid ----------------------------
 output$Abiotics_Medoid_Scatter <- renderPlot({
-   abiotics_medoids()$Scatter %>% grid.arrange()
+   abioticsMix_medoids()$Scatter %>% grid.arrange()
 })
 
 output$Abiotics_Medoid_temp <- renderPlot({
-   abiotics_medoids()$temp
+   abioticsMix_medoids()$temp
 })
 
 output$Abiotics_Medoid_Salinity <- renderPlot({
-   abiotics_medoids()$Salinity
+   abioticsMix_medoids()$Salinity
 })
 
 output$Abiotics_Medoid_Pressure <- renderPlot({
-   abiotics_medoids()$Pressure
+   abioticsMix_medoids()$Pressure
+})
+
+
+
+##### Ward ---------------------------- Mix
+output$Abiotics_Ward_Scatter_Mix <- renderPlot({
+   abioticsMix_ward()$Scatter %>% grid.arrange()
+})
+
+output$Abiotics_Ward_temp_Mix <- renderPlot({
+   abioticsMix_ward()$temp
+})
+
+output$Abiotics_Ward_Salinity_Mix <- renderPlot({
+   abioticsMix_ward()$Salinity
+})
+
+output$Abiotics_Ward_Pressure_Mix <- renderPlot({
+   abioticsMix_ward()$Pressure
+})
+
+##### medoids ---------------------------- Mix
+output$Abiotics_Medoid_Scatter_Mix <- renderPlot({
+   abioticsMix_medoids()$Scatter %>% grid.arrange()
+})
+
+output$Abiotics_Medoid_temp_Mix <- renderPlot({
+   abioticsMix_medoids()$temp
+})
+
+output$Abiotics_Medoid_Salinity_Mix <- renderPlot({
+   abioticsMix_medoids()$Salinity
+})
+
+output$Abiotics_Medoid_Pressure_Mix <- renderPlot({
+   abioticsMix_medoids()$Pressure
 })
 
 
@@ -457,7 +625,23 @@ output$MDS_2D_Medoid_Mix <- renderPlot({
      mds_OBJ = mds_obj())
  })
 
-
+ 
+ 
+ output$MDS_3D_Ward_Mix <- plotly::renderPlotly({
+   plot_mds3d(
+     df_group = df_plot(),
+     ClusterVar = 'MixWard_Clust',
+     mds_OBJ = mds_obj())
+ })
+ 
+ 
+ output$MDS_3D_Medoid_Mix <- plotly::renderPlotly({
+   plot_mds3d(
+     df_group = df_plot(),
+     ClusterVar = 'MixMedoid_Clust',
+     mds_OBJ = mds_obj())
+ })
+ 
 ### this was working properly
 
 # output$Abiotics_Medoids <- renderPlot({
@@ -470,8 +654,23 @@ output$MDS_2D_Medoid_Mix <- renderPlot({
 
 # Other Discussions
 
+```{r}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align='center',
+  fig.width = 16,
+  dpi=150)
+```
+
+
 ```{r,message=FALSE,warning=FALSE}
+#| code-fold: true
+
+
 #### Loading Packages 
+
 library(shiny)
 library(tidyverse) ; library(dplyr) ; library(ggplot2)
 library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis)  ; library(plotly)
@@ -479,7 +678,6 @@ library(gridExtra) ; library(tidyr) ; library(robCompositions) ; library(viridis
 #### Loading functions 
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ALR_CLR_distMatrices.R")
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/aggregating_composition_new.R")
-source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
 source("https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth.R")
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/ggLatDepth_temp.R')
 source('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/plot_mds2d.R')
@@ -505,13 +703,13 @@ dat_tax = dat_tax %>% mutate(
                   paste('ID',1:nrow(dat_tax),sep=''))))
                           
 )
-
 ```
 
 ::: {.panel-tabset}
 
 ## Creating all clusters
 ```{r,message=FALSE,warning=FALSE}
+#| code-fold: true
 ###### Creating all clusters ---------------------
 vec_aggregation <- 
   c('PG','SG1','Supergroup','Division',
@@ -543,6 +741,7 @@ In process
 First and more straight forward method = counting the number of different ASVs in each sample.
 
 ```{r,message=FALSE,warning=FALSE}
+#| code-fold: true
 #| layout-ncol: 2
 
 ASV_Over_Samples <- data.frame(
@@ -572,6 +771,9 @@ Samples_Over_ASV %>%
 ## Mixture of Distance Matrices
 
 ```{r}
+#| code-fold: true
+
+
 # ## Creating all Clusters
 # listW2 <- clusterize_MixDist_hclustW2(
 #   data_taxonomy = dat_tax,
@@ -664,6 +866,9 @@ df_outputSS_MixDist_0.2 = df_outputSS_MixDist %>% mutate(AlphaGeo=0.2)
 
 
 ```{r}
+#| code-fold: true
+
+
 ## Creating all Clusters
 # listW2 <- clusterize_MixDist_hclustW2(
 #   data_taxonomy = dat_tax,
@@ -758,6 +963,9 @@ df_outputSS_MixDist_0.1 <- data.table::fread('https://raw.githubusercontent.com/
 ```
 
 ```{r}
+#| code-fold: true
+
+
 ## Creating all Clusters
 # listW2 <- clusterize_MixDist_hclustW2(
 #   data_taxonomy = dat_tax,
@@ -863,6 +1071,9 @@ The first try was to, given the clusters:
    + related to Abiotic Features (Temperature, Salinity and Pressure)
 
 ```{r}
+#| code-fold: true
+
+
 # i is for removing at least
 # j is for aggregation level
 # k is for clustersize
@@ -998,7 +1209,6 @@ df_outputSS <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia
 
 #data.table::fwrite(df_outputSS_Rank,'/Users/rafaelcatoia/Desktop/repos/Capstone/df_outputSS_Rank.csv')
 df_outputSS_Rank <- data.table::fread('https://raw.githubusercontent.com/rafaelcatoia/zoop_16N/main/df_outputSS_Rank.csv')
-
 ```
 
 ::: {.panel-tabset}
@@ -1008,13 +1218,16 @@ df_outputSS_Rank <- data.table::fread('https://raw.githubusercontent.com/rafaelc
 ::: {.panel-tabset}
 
 #### Original distance
-```{r}
+```{r,fig.height=8}
+#| code-fold: true
+
+
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
-         agglevel=factor(agglevel,levels=vec_aggregation)) %>%
+         agglevel=factor(agglevel,levels=vec_aggregation)) %>% filter(atleast=='AtLeastIn1') %>% 
   filter(Dimension=='GeoSpatial') %>% 
-  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=atleast))+
+  ggplot(aes(x=NumberOfClusters,y=log(TotalSum),color=method,linetype=method))+
   geom_line(linewidth=0.75,alpha=0.75)+
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
@@ -1031,13 +1244,16 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)
+  viridis::scale_color_viridis(discrete = T)
 ```
 
 
 #### Rank
 
-```{r}
+```{r,fig.height=10}
+#| code-fold: true
+
+
 bind_rows(
   df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
   df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
@@ -1052,7 +1268,11 @@ bind_rows(
   facet_grid(atleast~agglevel)+
   theme_minimal()+
   theme(legend.position = 'bottom')
+```
 
+
+```{r,fig.height=12}
+#| code-fold: true
 bind_rows(
   df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
   df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
@@ -1079,7 +1299,9 @@ bind_rows(
 
 #### Original distance
 
-```{r}
+```{r,fig.height=8}
+#| code-fold: true
+
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
@@ -1090,7 +1312,11 @@ df_outputSS %>%
   facet_wrap(~agglevel,nrow=2)+
   theme_minimal()+
   theme(legend.position = 'bottom')
+```
 
+
+```{r,fig.height=10}
+#| code-fold: true
 df_outputSS %>% 
   mutate(NumberOfClusters = as.integer(gsub('Cluster','',clusters)),
          Dimension = ifelse(dimension=='df_LatDephtDistance','GeoSpatial','Abiotics'),
@@ -1101,11 +1327,12 @@ df_outputSS %>%
   facet_grid(atleast~method)+
   theme_minimal()+
   theme(legend.position = 'bottom')+
-  viridis::scale_color_viridis(10,discrete = T)
+  viridis::scale_color_viridis(discrete = T)
 ```
 
 #### Rank
-```{r}
+```{r,fig.height=10}
+#| code-fold: true
 bind_rows(
   df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
   df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
@@ -1120,7 +1347,11 @@ bind_rows(
   facet_grid(atleast~agglevel)+
   theme_minimal()+
   theme(legend.position = 'bottom')
+```
 
+
+```{r,fig.height=14}
+#| code-fold: true
 bind_rows(
   df_outputSS_Rank %>% mutate(Dist='Rank',AlphaGeo='0'),
   df_outputSS_MixDist_0.1 %>% mutate(Dist='Rank',AlphaGeo = '0.1'),
@@ -1142,11 +1373,11 @@ bind_rows(
 
 ::: 
 
+## Creating all clusters
+
+testing 
 
 ::: 
 
 :::
 
-
-
-:::

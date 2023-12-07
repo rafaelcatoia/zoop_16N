@@ -13,7 +13,10 @@ clusterize_MixDist_hclustW2 <- function(
     vec_aggreg,
     max_k=30,
     max_at_least=1,
-    moment='Before',DepthRank=T,propGeo=0.2){
+    moment='Before',
+    DepthRank=T,
+    ABS_Latitude=F,
+    propGeo=0.2){
   
   
   if(DepthRank){
@@ -46,8 +49,11 @@ clusterize_MixDist_hclustW2 <- function(
         
         df_comp <- df_comp %>% left_join(data_metadat %>% select(Samples,Latitude,Depth))
         
-        GeoDist <- df_comp %>% select(Latitude,Depth) %>% dist()
-        
+        if(ABS_Latitude){
+          GeoDist <- df_comp %>% select(Latitude,Depth) %>% mutate(Latitude=abs(Latitude))%>% dist()  
+        }else{
+          GeoDist <- df_comp %>% select(Latitude,Depth) %>% dist()  
+        }
         ## Mixing the distances
         GeoDist = GeoDist/max(GeoDist)
         AitchisonDist <- clrObj$dist_Aitchison/max(clrObj$dist_Aitchison)
