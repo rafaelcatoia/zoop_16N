@@ -32,12 +32,12 @@ ggLatDepth <- function(
   
   if(LatitudeRegions){
     output = output+
-      annotate("text",size = labelSize*0.25, x = -67, y = -50, label = "Southern Ocean",hjust=0.5)+
-      annotate("text",size = labelSize*0.25, x = -52, y = -50, label = "Subantarctic",hjust=0.5)+
-      annotate("text",size = labelSize*0.25, x = -25, y = -50, label = "South Pacific Gyre",hjust=0.5)+
-      annotate("text",size = labelSize*0.25, x = 0,   y = -50, label = "Equatorial",hjust=0.5)+
-      annotate("text",size = labelSize*0.25, x = 20,  y = -50, label = "North Pacific Gyre",hjust=0.5)+
-      annotate("text",size = labelSize*0.25, x = 45,  y = -50, label = "Subarctic",hjust=0.5)
+      annotate("text",size = labelSize*0.3, x = -67, y = -50, label = "Southern Ocean",hjust=0.5)+
+      annotate("text",size = labelSize*0.3, x = -52, y = -50, label = "Subantarctic",hjust=0.5)+
+      annotate("text",size = labelSize*0.3, x = -25, y = -50, label = "South Pacific Gyre",hjust=0.5)+
+      annotate("text",size = labelSize*0.3, x = 0,   y = -50, label = "Equatorial",hjust=0.5)+
+      annotate("text",size = labelSize*0.3, x = 20,  y = -50, label = "North Pacific Gyre",hjust=0.5)+
+      annotate("text",size = labelSize*0.3, x = 45,  y = -50, label = "Subarctic",hjust=0.5)
   }
   
 

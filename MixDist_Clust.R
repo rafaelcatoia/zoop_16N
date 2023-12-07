@@ -10,6 +10,8 @@ MixDist_Clust <- function(
     alphaGeo,
     depthRank='Y',
     ABS_Latitude=F,
+    logDepth=F,
+    scalingLatDepth = F,
     k_clust){
   AitDist <- ALR_CLR_distMatrices(data_tax_aux)$dist_Aitchison
   
@@ -18,18 +20,30 @@ MixDist_Clust <- function(
       select(-Depth) %>% 
       left_join(metadat_aux %>% 
                   select(Samples,Latitude,Depth) %>% 
-                  arrange(Samples,Depth) %>% select(-Depth) %>% 
-                  group_by(Latitude) %>% mutate(Depth=1:n()))
+                  arrange(Depth) %>% mutate(Depth=1:n()))
   }
   
-  data_tax_aux <- data_tax_aux %>% left_join(metadat_aux %>% select(Samples,Latitude,Depth))
+  if(logDepth){
+    metadat_aux <- metadat_aux %>% mutate(Depth = log(Depth))
+  }
+  
+  
+  data_tax_aux <- data_tax_aux %>%
+    left_join(metadat_aux %>% select(Samples,Latitude,Depth)) %>% 
+    mutate(Depth_Calc = Depth, Latitude_Calc = Latitude)
   
   if(ABS_Latitude){
-    GeoDist <- data_tax_aux %>% select(Latitude,Depth) %>% mutate(Latitude=abs(Latitude))%>% dist()  
-  }else{
-    GeoDist <- data_tax_aux %>% select(Latitude,Depth) %>% dist()  
+    data_tax_aux = data_tax_aux %>% mutate(Latitude_Calc=abs(Latitude_Calc))
   }
   
+  if(scalingLatDepth){
+    data_tax_aux = data_tax_aux %>% 
+      mutate(Depth_Calc=scale(Latitude_Calc),
+             Latitude_Calc=scale(Latitude_Calc))
+  }
+  
+  GeoDist = data_tax_aux %>% select(Latitude_Calc,Depth_Calc) %>% mutate(Latitude=abs(Latitude)) %>% dist()  
+
   ## Mixing the distances
   GeoDist = GeoDist/max(GeoDist)
   AitchisonDist <- AitDist/max(AitDist)
