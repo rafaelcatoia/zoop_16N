@@ -42,7 +42,7 @@ MixDist_Clust <- function(
              Latitude_Calc=scale(Latitude_Calc))
   }
   
-  GeoDist = data_tax_aux %>% select(Latitude_Calc,Depth_Calc) %>% mutate(Latitude=abs(Latitude)) %>% dist()  
+  GeoDist = data_tax_aux %>% select(Latitude_Calc,Depth_Calc) %>% dist()  
 
   ## Mixing the distances
   GeoDist = GeoDist/max(GeoDist)
