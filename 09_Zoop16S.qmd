@@ -45,7 +45,7 @@ sliderInput(inputId = "alphaGeo",
                   min = 0,
                   max = 1,step = 0.05,value = 0.1)  
 selectInput('DephtRank','Depht as Rank N/Y',selected = 1,DephtRank)
-selectInput('Standardize',  'Depht in the log scale',selected = 1,LogDepth)
+selectInput('Standardize',  'Standartize',selected = 1,Standardize)
 selectInput('ABS_Latitude','Abs of the Latitude N/Y',selected = 1,ABS_Latitude)
 ```
 :::
